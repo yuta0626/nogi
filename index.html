@@ -6,7 +6,7 @@
 <style>
   body { font-family: sans-serif; padding: 20px; }
   table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+  th, td { border: 1px solid #ccc; padding: 8px; }
 
   /* 期別背景色 */
   .bg-3rd { background-color: #cceeff; }
@@ -14,13 +14,19 @@
   .bg-5th { background-color: #ffd6e7; }
   .bg-6th { background-color: #ccf5cc; }
 
+  /* お気に入り（★） */
   .favorite {
     cursor: pointer;
-    font-size: 20px;
+    font-size: 16px;
+    vertical-align: middle;
     margin-right: 6px;
   }
   .favorite.checked {
     color: gold;
+  }
+
+  td.name-cell {
+    text-align: left;
   }
 
   .tab-area {
@@ -48,6 +54,13 @@
     border: 1px solid #aaa;
     background: #f9f9f9;
   }
+
+  .add-member-box {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #aaa;
+    background: #eef;
+  }
 </style>
 </head>
 <body>
@@ -57,6 +70,20 @@
 <!-- タブ -->
 <div class="tab-area" id="tabArea"></div>
 <button id="addListBtn">＋ 新規リスト</button>
+
+<!-- メンバー追加 -->
+<div class="add-member-box">
+  <h3>メンバー追加（このリスト専用）</h3>
+  名前：<input type="text" id="newMemberName">
+  期別：
+  <select id="newMemberGen">
+    <option value="3">3期</option>
+    <option value="4">4期</option>
+    <option value="5">5期</option>
+    <option value="6">6期</option>
+  </select>
+  <button id="addMemberBtn">追加</button>
+</div>
 
 <!-- 種類数設定 -->
 <div class="setting-box">
@@ -82,19 +109,21 @@
 </table>
 
 <script>
-// 期別メンバー
-const members3 = ["伊藤理々杏","岩本蓮加","吉田綾乃クリスティー"];
-const members4 = ["遠藤さくら","賀喜遥香","金川紗耶","黒見明香","柴田柚菜","田村真佑","筒井あやめ","林瑠奈","弓木奈於"];
-const members5 = ["五百城茉央","池田瑛紗","一ノ瀬美空","井上和","岡本姫奈","小川彩","奥田いろは","川﨑桜","菅原咲月","冨里奈央","中西アルノ"];
-const members6 = ["愛宕心響","大越ひなの","小津玲奈","海邉朱莉","川端晃菜","鈴木佑捺","瀬戸口心月","長嶋凛桜","増田三莉音","森平麗心","矢田萌華"];
+// 初期メンバー（期別）
+const defaultMembers = {
+  3: ["伊藤理々杏","岩本蓮加","吉田綾乃クリスティー"],
+  4: ["遠藤さくら","賀喜遥香","金川紗耶","黒見明香","柴田柚菜","田村真佑","筒井あやめ","林瑠奈","弓木奈於"],
+  5: ["五百城茉央","池田瑛紗","一ノ瀬美空","井上和","岡本姫奈","小川彩","奥田いろは","川﨑桜","菅原咲月","冨里奈央","中西アルノ"],
+  6: ["愛宕心響","大越ひなの","小津玲奈","海邉朱莉","川端晃菜","鈴木佑捺","瀬戸口心月","長嶋凛桜","増田三莉音","森平麗心","矢田萌華"]
+};
 
-const generationMap = {};
-members3.forEach(n => generationMap[n] = "bg-3rd");
-members4.forEach(n => generationMap[n] = "bg-4th");
-members5.forEach(n => generationMap[n] = "bg-5th");
-members6.forEach(n => generationMap[n] = "bg-6th");
-
-const people = [...members3, ...members4, ...members5, ...members6];
+// 背景色マップ
+const genColor = {
+  3: "bg-3rd",
+  4: "bg-4th",
+  5: "bg-5th",
+  6: "bg-6th"
+};
 
 // localStorage 読み込み
 let lists = JSON.parse(localStorage.getItem("nogiLists")) || [
@@ -102,6 +131,7 @@ let lists = JSON.parse(localStorage.getItem("nogiLists")) || [
     name: "通常",
     typeCount: 3,
     typeNames: ["A","B","C"],
+    members: JSON.parse(JSON.stringify(defaultMembers)), // 期別ごとに保持
     data: {} // メンバーごとのデータ
   }
 ];
@@ -146,9 +176,26 @@ document.getElementById("addListBtn").addEventListener("click", () => {
     name: "新規リスト",
     typeCount: 3,
     typeNames: ["A","B","C"],
+    members: JSON.parse(JSON.stringify(defaultMembers)),
     data: {}
   });
   currentListIndex = lists.length - 1;
+  saveData();
+  renderAll();
+});
+
+// メンバー追加
+document.getElementById("addMemberBtn").addEventListener("click", () => {
+  const name = document.getElementById("newMemberName").value.trim();
+  const gen = Number(document.getElementById("newMemberGen").value);
+
+  if (!name) return;
+
+  const list = lists[currentListIndex];
+  if (!list.members[gen].includes(name)) {
+    list.members[gen].push(name);
+  }
+
   saveData();
   renderAll();
 });
@@ -203,10 +250,14 @@ function renderHeader() {
     th.textContent = list.typeNames[i];
     header.appendChild(th);
   }
+
+  const thDel = document.createElement("th");
+  thDel.textContent = "削除";
+  header.appendChild(thDel);
 }
 
 // 行生成
-function createRow(name) {
+function createRow(name, gen) {
   const tr = document.createElement("tr");
 
   const list = lists[currentListIndex];
@@ -222,9 +273,9 @@ function createRow(name) {
   });
 
   const nameCell = document.createElement("td");
+  nameCell.className = "name-cell " + genColor[gen];
   nameCell.appendChild(fav);
   nameCell.appendChild(document.createTextNode(name));
-  nameCell.classList.add(generationMap[name]);
   tr.appendChild(nameCell);
 
   for (let i = 0; i < list.typeCount; i++) {
@@ -263,6 +314,19 @@ function createRow(name) {
     tr.appendChild(td);
   }
 
+  // 削除ボタン
+  const delTd = document.createElement("td");
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "削除";
+  delBtn.addEventListener("click", () => {
+    list.members[gen] = list.members[gen].filter(m => m !== name);
+    delete list.data[name];
+    saveData();
+    renderAll();
+  });
+  delTd.appendChild(delBtn);
+  tr.appendChild(delTd);
+
   return tr;
 }
 
@@ -273,7 +337,13 @@ function renderTable() {
   const body = document.getElementById("tableBody");
   body.innerHTML = "";
 
-  people.forEach(p => body.appendChild(createRow(p)));
+  const list = lists[currentListIndex];
+
+  Object.keys(list.members).forEach(gen => {
+    list.members[gen].forEach(name => {
+      body.appendChild(createRow(name, Number(gen)));
+    });
+  });
 
   saveData();
 }
