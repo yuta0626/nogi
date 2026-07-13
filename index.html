@@ -8,30 +8,22 @@
   table { border-collapse: collapse; width: 100%; margin-top: 20px; }
   th, td { border: 1px solid #ccc; padding: 8px; }
 
-  /* 期別背景色 */
   .bg-3rd { background-color: #cceeff; }
   .bg-4th { background-color: #ffddaa; }
   .bg-5th { background-color: #ffd6e7; }
   .bg-6th { background-color: #ccf5cc; }
 
-  /* お気に入り（★） */
   .favorite {
     cursor: pointer;
     font-size: 16px;
     vertical-align: middle;
     margin-right: 6px;
   }
-  .favorite.checked {
-    color: gold;
-  }
+  .favorite.checked { color: gold; }
 
-  td.name-cell {
-    text-align: left;
-  }
+  td.name-cell { text-align: left; }
 
-  .tab-area {
-    margin-bottom: 20px;
-  }
+  .tab-area { margin-bottom: 20px; }
   .tab {
     display: inline-block;
     padding: 8px 12px;
@@ -40,25 +32,18 @@
     background: #eee;
     cursor: pointer;
   }
-  .tab.active {
-    background: #ddd;
-    font-weight: bold;
-  }
-  .tab input {
-    width: 80px;
-  }
+  .tab.active { background: #ddd; font-weight: bold; }
+  .tab input { width: 80px; }
 
-  .setting-box, .add-member-box {
+  .setting-box {
     margin-bottom: 20px;
     padding: 10px;
     border: 1px solid #aaa;
     background: #f9f9f9;
   }
 
-  #undoBtn {
-    margin-bottom: 20px;
-    padding: 8px 12px;
-  }
+  #undoBtn { margin-bottom: 20px; padding: 8px 12px; }
+  #deleteTabBtn { margin-left: 10px; padding: 8px 12px; }
 </style>
 </head>
 <body>
@@ -67,11 +52,10 @@
 
 <button id="undoBtn">⟲ 1つ戻る</button>
 
-<!-- タブ -->
 <div class="tab-area" id="tabArea"></div>
 <button id="addListBtn">＋ 新規リスト</button>
+<button id="deleteTabBtn">タブ削除</button>
 
-<!-- 種類数設定 -->
 <div class="setting-box">
   <h3>種類数の設定（リストごとに独立）</h3>
   <label><input type="radio" name="typeCount" value="3"> 3種</label>
@@ -79,7 +63,6 @@
   <label><input type="radio" name="typeCount" value="5"> 5種</label>
 </div>
 
-<!-- 種類名設定 -->
 <div class="setting-box">
   <h3>種類名の設定</h3>
   <div id="typeNameInputs"></div>
@@ -95,7 +78,7 @@
 </table>
 
 <script>
-// 初期メンバー（期別）
+// 初期メンバー
 const defaultMembers = {
   3: ["伊藤理々杏","岩本蓮加","吉田綾乃クリスティー"],
   4: ["遠藤さくら","賀喜遥香","金川紗耶","黒見明香","柴田柚菜","田村真佑","筒井あやめ","林瑠奈","弓木奈於"],
@@ -103,15 +86,8 @@ const defaultMembers = {
   6: ["愛宕心響","大越ひなの","小津玲奈","海邉朱莉","川端晃菜","鈴木佑捺","瀬戸口心月","長嶋凛桜","増田三莉音","森平麗心","矢田萌華"]
 };
 
-// 背景色マップ
-const genColor = {
-  3: "bg-3rd",
-  4: "bg-4th",
-  5: "bg-5th",
-  6: "bg-6th"
-};
+const genColor = { 3:"bg-3rd", 4:"bg-4th", 5:"bg-5th", 6:"bg-6th" };
 
-// localStorage 読み込み
 let lists = JSON.parse(localStorage.getItem("nogiLists")) || [
   {
     name: "通常",
@@ -122,22 +98,21 @@ let lists = JSON.parse(localStorage.getItem("nogiLists")) || [
   }
 ];
 
-// バックアップ
-let backup = JSON.parse(localStorage.getItem("nogiLists_backup")) || null;
-
 let currentListIndex = 0;
 
-// 保存
+// 直前状態のバックアップ
+function backupData() {
+  localStorage.setItem("nogiLists_backup", JSON.stringify(lists));
+}
 function saveData() {
-  localStorage.setItem("nogiLists_backup", JSON.stringify(lists)); // バックアップ
   localStorage.setItem("nogiLists", JSON.stringify(lists));
 }
 
-// 戻る
+// Undo
 document.getElementById("undoBtn").addEventListener("click", () => {
-  const backupData = localStorage.getItem("nogiLists_backup");
-  if (backupData) {
-    lists = JSON.parse(backupData);
+  const backup = localStorage.getItem("nogiLists_backup");
+  if (backup) {
+    lists = JSON.parse(backup);
     saveData();
     renderAll();
   }
@@ -155,6 +130,7 @@ function renderTabs() {
     const input = document.createElement("input");
     input.value = list.name;
     input.addEventListener("input", () => {
+      backupData();
       list.name = input.value;
       saveData();
     });
@@ -170,13 +146,24 @@ function renderTabs() {
   });
 }
 
-// 新規リスト追加（全メンバー表示）
+// タブ削除
+document.getElementById("deleteTabBtn").addEventListener("click", () => {
+  if (lists.length <= 1) return; // 最低1タブは残す
+  backupData();
+  lists.splice(currentListIndex, 1);
+  if (currentListIndex >= lists.length) currentListIndex = lists.length - 1;
+  saveData();
+  renderAll();
+});
+
+// 新規タブ（全メンバー表示）
 document.getElementById("addListBtn").addEventListener("click", () => {
+  backupData();
   lists.push({
     name: "新規リスト",
     typeCount: 3,
     typeNames: ["A","B","C"],
-    members: JSON.parse(JSON.stringify(defaultMembers)), // 全員表示
+    members: JSON.parse(JSON.stringify(defaultMembers)),
     data: {}
   });
   currentListIndex = lists.length - 1;
@@ -199,6 +186,7 @@ function renderTypeNameInputs() {
 
   box.querySelectorAll("input").forEach(input => {
     input.addEventListener("input", () => {
+      backupData();
       const idx = input.dataset.index;
       lists[currentListIndex].typeNames[idx] = input.value;
       saveData();
@@ -210,6 +198,7 @@ function renderTypeNameInputs() {
 // 種類数設定
 document.querySelectorAll("input[name='typeCount']").forEach(radio => {
   radio.addEventListener("change", () => {
+    backupData();
     const list = lists[currentListIndex];
     list.typeCount = Number(radio.value);
 
@@ -222,7 +211,7 @@ document.querySelectorAll("input[name='typeCount']").forEach(radio => {
   });
 });
 
-// ヘッダー描画
+// ヘッダー
 function renderHeader() {
   const header = document.getElementById("headerRow");
   header.innerHTML = "<th>人物名</th>";
@@ -243,7 +232,6 @@ function renderHeader() {
 // 行生成
 function createRow(name, gen) {
   const tr = document.createElement("tr");
-
   const list = lists[currentListIndex];
   if (!list.data[name]) list.data[name] = { favorite: false, items: [] };
 
@@ -251,6 +239,7 @@ function createRow(name, gen) {
   fav.textContent = "★";
   fav.className = "favorite" + (list.data[name].favorite ? " checked" : "");
   fav.addEventListener("click", () => {
+    backupData();
     list.data[name].favorite = !list.data[name].favorite;
     fav.classList.toggle("checked");
     saveData();
@@ -279,6 +268,7 @@ function createRow(name, gen) {
     number.value = list.data[name].items[i].count;
 
     checkbox.addEventListener("change", () => {
+      backupData();
       list.data[name].items[i].checked = checkbox.checked;
       number.disabled = !checkbox.checked;
       if (!checkbox.checked) {
@@ -289,6 +279,7 @@ function createRow(name, gen) {
     });
 
     number.addEventListener("input", () => {
+      backupData();
       list.data[name].items[i].count = number.value;
       saveData();
     });
@@ -298,11 +289,11 @@ function createRow(name, gen) {
     tr.appendChild(td);
   }
 
-  // 削除ボタン
   const delTd = document.createElement("td");
   const delBtn = document.createElement("button");
   delBtn.textContent = "削除";
   delBtn.addEventListener("click", () => {
+    backupData();
     list.members[gen] = list.members[gen].filter(m => m !== name);
     delete list.data[name];
     saveData();
@@ -328,8 +319,6 @@ function renderTable() {
       body.appendChild(createRow(name, Number(gen)));
     });
   });
-
-  saveData();
 }
 
 // 全描画
