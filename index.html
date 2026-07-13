@@ -42,7 +42,6 @@
     cursor: pointer;
   }
   .tab.active { background: #ddd; font-weight: bold; }
-  .tab input { width: 80px; }
 
   .setting-box {
     margin-bottom: 20px;
@@ -61,10 +60,19 @@
 
 <button id="undoBtn">⟲ 1つ戻る</button>
 
+<!-- タブ -->
 <div class="tab-area" id="tabArea"></div>
 <button id="addListBtn">＋ 新規リスト</button>
 <button id="deleteTabBtn">タブ削除</button>
 
+<!-- タブ名編集（スマホ対応） -->
+<div class="setting-box">
+  <h3>タブ名編集</h3>
+  <input type="text" id="editTabName">
+  <button id="saveTabNameBtn">変更</button>
+</div>
+
+<!-- 種類数設定 -->
 <div class="setting-box">
   <h3>種類数の設定（リストごとに独立）</h3>
   <label><input type="radio" name="typeCount" value="3"> 3種</label>
@@ -72,6 +80,7 @@
   <label><input type="radio" name="typeCount" value="5"> 5種</label>
 </div>
 
+<!-- 種類名設定 -->
 <div class="setting-box">
   <h3>種類名の設定</h3>
   <div id="typeNameInputs"></div>
@@ -127,7 +136,7 @@ document.getElementById("undoBtn").addEventListener("click", () => {
   }
 });
 
-// タブ描画
+// タブ描画（スマホ対応：タブ内に input を置かない）
 function renderTabs() {
   const area = document.getElementById("tabArea");
   area.innerHTML = "";
@@ -135,16 +144,7 @@ function renderTabs() {
   lists.forEach((list, index) => {
     const tab = document.createElement("div");
     tab.className = "tab" + (index === currentListIndex ? " active" : "");
-
-    const input = document.createElement("input");
-    input.value = list.name;
-    input.addEventListener("input", () => {
-      backupData();
-      list.name = input.value;
-      saveData();
-    });
-
-    tab.appendChild(input);
+    tab.textContent = list.name;
 
     tab.addEventListener("click", () => {
       currentListIndex = index;
@@ -154,6 +154,14 @@ function renderTabs() {
     area.appendChild(tab);
   });
 }
+
+// タブ名編集
+document.getElementById("saveTabNameBtn").addEventListener("click", () => {
+  backupData();
+  lists[currentListIndex].name = document.getElementById("editTabName").value;
+  saveData();
+  renderAll();
+});
 
 // タブ削除
 document.getElementById("deleteTabBtn").addEventListener("click", () => {
@@ -333,6 +341,9 @@ function renderTable() {
 // 全描画
 function renderAll() {
   renderTabs();
+
+  // タブ名編集欄に反映
+  document.getElementById("editTabName").value = lists[currentListIndex].name;
 
   const list = lists[currentListIndex];
   document.querySelectorAll("input[name='typeCount']").forEach(radio => {
