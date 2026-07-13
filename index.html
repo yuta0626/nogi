@@ -8,11 +8,13 @@
   table { border-collapse: collapse; width: 100%; margin-top: 20px; }
   th, td { border: 1px solid #ccc; padding: 8px; }
 
+  /* 期別背景色 */
   .bg-3rd { background-color: #cceeff; }
   .bg-4th { background-color: #ffddaa; }
   .bg-5th { background-color: #ffd6e7; }
   .bg-6th { background-color: #ccf5cc; }
 
+  /* お気に入り（★） */
   .favorite {
     cursor: pointer;
     font-size: 16px;
@@ -20,14 +22,13 @@
     margin-right: 6px;
   }
   .favorite.checked {
-  color: gold;
-  text-shadow:
-    -1px -1px 0 #000,
-     1px -1px 0 #000,
-    -1px  1px 0 #000,
-     1px  1px 0 #000;
-}
-
+    color: gold;
+    text-shadow:
+      -1px -1px 0 #000,
+       1px -1px 0 #000,
+      -1px  1px 0 #000,
+       1px  1px 0 #000;
+  }
 
   td.name-cell { text-align: left; }
 
@@ -108,7 +109,7 @@ let lists = JSON.parse(localStorage.getItem("nogiLists")) || [
 
 let currentListIndex = 0;
 
-// 直前状態のバックアップ
+// バックアップ
 function backupData() {
   localStorage.setItem("nogiLists_backup", JSON.stringify(lists));
 }
@@ -156,7 +157,7 @@ function renderTabs() {
 
 // タブ削除
 document.getElementById("deleteTabBtn").addEventListener("click", () => {
-  if (lists.length <= 1) return; // 最低1タブは残す
+  if (lists.length <= 1) return;
   backupData();
   lists.splice(currentListIndex, 1);
   if (currentListIndex >= lists.length) currentListIndex = lists.length - 1;
