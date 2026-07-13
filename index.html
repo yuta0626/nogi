@@ -7,6 +7,13 @@
   body { font-family: sans-serif; padding: 20px; }
   table { border-collapse: collapse; width: 100%; margin-top: 20px; }
   th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+
+  /* 期別背景色 */
+  .bg-3rd { background-color: #cceeff; } /* 水色 */
+  .bg-4th { background-color: #ffddaa; } /* 橙 */
+  .bg-5th { background-color: #ffd6e7; } /* ピンク */
+  .bg-6th { background-color: #ccf5cc; } /* 緑 */
+
   .toggle-area { margin-bottom: 15px; }
 </style>
 </head>
@@ -84,6 +91,13 @@ const members6 = [
   "矢田萌華"
 ];
 
+// 期別を判定するための辞書
+const generationMap = {};
+members3.forEach(n => generationMap[n] = "bg-3rd");
+members4.forEach(n => generationMap[n] = "bg-4th");
+members5.forEach(n => generationMap[n] = "bg-5th");
+members6.forEach(n => generationMap[n] = "bg-6th");
+
 // 全期生を結合
 const people = [...members3, ...members4, ...members5, ...members6];
 
@@ -92,6 +106,10 @@ function createRow(name) {
 
   const nameCell = document.createElement("td");
   nameCell.textContent = name;
+
+  // 期別背景色を適用
+  nameCell.classList.add(generationMap[name]);
+
   tr.appendChild(nameCell);
 
   ["A", "B", "C", "D", "E"].forEach(type => {
