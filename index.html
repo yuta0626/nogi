@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>所持グッズ管理</title>
+<title>所持グッズ管理（乃木坂3〜6期生）</title>
 <style>
   body { font-family: sans-serif; padding: 20px; }
   table { border-collapse: collapse; width: 100%; margin-top: 20px; }
@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<h2>所持グッズ管理（ベース版）</h2>
+<h2>所持グッズ管理（乃木坂3〜6期生）</h2>
 
 <div class="toggle-area">
   <label><input type="checkbox" id="toggleD" checked> D を表示</label>
@@ -30,12 +30,62 @@
       <th class="colE">E</th>
     </tr>
   </thead>
-  <tbody id="tableBody">
-  </tbody>
+  <tbody id="tableBody"></tbody>
 </table>
 
 <script>
-const people = ["人物1", "人物2", "人物3"]; // ←後で増やせる
+// 3期生
+const members3 = [
+  "伊藤理々杏",
+  "岩本蓮加",
+  "吉田綾乃クリスティー"
+];
+
+// 4期生
+const members4 = [
+  "遠藤さくら",
+  "賀喜遥香",
+  "金川紗耶",
+  "黒見明香",
+  "柴田柚菜",
+  "田村真佑",
+  "筒井あやめ",
+  "林瑠奈",
+  "弓木奈於"
+];
+
+// 5期生
+const members5 = [
+  "五百城茉央",
+  "池田瑛紗",
+  "一ノ瀬美空",
+  "井上和",
+  "岡本姫奈",
+  "小川彩",
+  "奥田いろは",
+  "川﨑桜",
+  "菅原咲月",
+  "冨里奈央",
+  "中西アルノ"
+];
+
+// 6期生
+const members6 = [
+  "愛宕心響",
+  "大越ひなの",
+  "小津玲奈",
+  "海邉朱莉",
+  "川端晃菜",
+  "鈴木佑捺",
+  "瀬戸口心月",
+  "長嶋凛桜",
+  "増田三莉音",
+  "森平麗心",
+  "矢田萌華"
+];
+
+// 全期生を結合
+const people = [...members3, ...members4, ...members5, ...members6];
 
 function createRow(name) {
   const tr = document.createElement("tr");
