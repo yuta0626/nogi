@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>所持グッズ管理</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+  .toggle-area { margin-bottom: 15px; }
+</style>
+</head>
+<body>
+
+<h2>所持グッズ管理（ベース版）</h2>
+
+<div class="toggle-area">
+  <label><input type="checkbox" id="toggleD" checked> D を表示</label>
+  <label style="margin-left: 10px;"><input type="checkbox" id="toggleE" checked> E を表示</label>
+</div>
+
+<table id="goodsTable">
+  <thead>
+    <tr>
+      <th>人物名</th>
+      <th class="colA">A</th>
+      <th class="colB">B</th>
+      <th class="colC">C</th>
+      <th class="colD">D</th>
+      <th class="colE">E</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody">
+  </tbody>
+</table>
+
+<script>
+const people = ["人物1", "人物2", "人物3"]; // ←後で増やせる
+
+function createRow(name) {
+  const tr = document.createElement("tr");
+
+  const nameCell = document.createElement("td");
+  nameCell.textContent = name;
+  tr.appendChild(nameCell);
+
+  ["A", "B", "C", "D", "E"].forEach(type => {
+    const td = document.createElement("td");
+    td.classList.add("col" + type);
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+
+    const number = document.createElement("input");
+    number.type = "number";
+    number.min = 0;
+    number.style.width = "50px";
+    number.disabled = true;
+
+    checkbox.addEventListener("change", () => {
+      number.disabled = !checkbox.checked;
+      if (!checkbox.checked) number.value = "";
+    });
+
+    td.appendChild(checkbox);
+    td.appendChild(number);
+    tr.appendChild(td);
+  });
+
+  return tr;
+}
+
+function renderTable() {
+  const body = document.getElementById("tableBody");
+  body.innerHTML = "";
+  people.forEach(p => body.appendChild(createRow(p)));
+}
+
+renderTable();
+
+// D/E の表示切り替え
+document.getElementById("toggleD").addEventListener("change", e => {
+  document.querySelectorAll(".colD").forEach(col => {
+    col.style.display = e.target.checked ? "" : "none";
+  });
+});
+
+document.getElementById("toggleE").addEventListener("change", e => {
+  document.querySelectorAll(".colE").forEach(col => {
+    col.style.display = e.target.checked ? "" : "none";
+  });
+});
+</script>
+
+</body>
+</html>
