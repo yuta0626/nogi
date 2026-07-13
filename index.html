@@ -14,6 +14,15 @@
   .bg-5th { background-color: #ffd6e7; }
   .bg-6th { background-color: #ccf5cc; }
 
+  .favorite {
+    cursor: pointer;
+    font-size: 20px;
+    margin-right: 6px;
+  }
+  .favorite.checked {
+    color: gold;
+  }
+
   .tab-area {
     margin-bottom: 20px;
   }
@@ -87,16 +96,22 @@ members6.forEach(n => generationMap[n] = "bg-6th");
 
 const people = [...members3, ...members4, ...members5, ...members6];
 
-// 複数リスト管理
-let lists = [
+// localStorage 読み込み
+let lists = JSON.parse(localStorage.getItem("nogiLists")) || [
   {
     name: "通常",
     typeCount: 3,
     typeNames: ["A","B","C"],
+    data: {} // メンバーごとのデータ
   }
 ];
 
 let currentListIndex = 0;
+
+// 保存
+function saveData() {
+  localStorage.setItem("nogiLists", JSON.stringify(lists));
+}
 
 // タブ描画
 function renderTabs() {
@@ -111,6 +126,7 @@ function renderTabs() {
     input.value = list.name;
     input.addEventListener("input", () => {
       list.name = input.value;
+      saveData();
     });
 
     tab.appendChild(input);
@@ -129,9 +145,11 @@ document.getElementById("addListBtn").addEventListener("click", () => {
   lists.push({
     name: "新規リスト",
     typeCount: 3,
-    typeNames: ["A","B","C"]
+    typeNames: ["A","B","C"],
+    data: {}
   });
   currentListIndex = lists.length - 1;
+  saveData();
   renderAll();
 });
 
@@ -152,6 +170,7 @@ function renderTypeNameInputs() {
     input.addEventListener("input", () => {
       const idx = input.dataset.index;
       lists[currentListIndex].typeNames[idx] = input.value;
+      saveData();
       renderTable();
     });
   });
@@ -163,11 +182,11 @@ document.querySelectorAll("input[name='typeCount']").forEach(radio => {
     const list = lists[currentListIndex];
     list.typeCount = Number(radio.value);
 
-    // 種類名を補完
     while (list.typeNames.length < list.typeCount) {
       list.typeNames.push("新種");
     }
 
+    saveData();
     renderAll();
   });
 });
@@ -190,28 +209,53 @@ function renderHeader() {
 function createRow(name) {
   const tr = document.createElement("tr");
 
+  const list = lists[currentListIndex];
+  if (!list.data[name]) list.data[name] = { favorite: false, items: [] };
+
+  const fav = document.createElement("span");
+  fav.textContent = "★";
+  fav.className = "favorite" + (list.data[name].favorite ? " checked" : "");
+  fav.addEventListener("click", () => {
+    list.data[name].favorite = !list.data[name].favorite;
+    fav.classList.toggle("checked");
+    saveData();
+  });
+
   const nameCell = document.createElement("td");
-  nameCell.textContent = name;
+  nameCell.appendChild(fav);
+  nameCell.appendChild(document.createTextNode(name));
   nameCell.classList.add(generationMap[name]);
   tr.appendChild(nameCell);
 
-  const list = lists[currentListIndex];
-
   for (let i = 0; i < list.typeCount; i++) {
+    if (!list.data[name].items[i]) list.data[name].items[i] = { checked: false, count: "" };
+
     const td = document.createElement("td");
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
+    checkbox.checked = list.data[name].items[i].checked;
 
     const number = document.createElement("input");
     number.type = "number";
     number.min = 0;
     number.style.width = "50px";
-    number.disabled = true;
+    number.disabled = !checkbox.checked;
+    number.value = list.data[name].items[i].count;
 
     checkbox.addEventListener("change", () => {
+      list.data[name].items[i].checked = checkbox.checked;
       number.disabled = !checkbox.checked;
-      if (!checkbox.checked) number.value = "";
+      if (!checkbox.checked) {
+        number.value = "";
+        list.data[name].items[i].count = "";
+      }
+      saveData();
+    });
+
+    number.addEventListener("input", () => {
+      list.data[name].items[i].count = number.value;
+      saveData();
     });
 
     td.appendChild(checkbox);
@@ -230,13 +274,14 @@ function renderTable() {
   body.innerHTML = "";
 
   people.forEach(p => body.appendChild(createRow(p)));
+
+  saveData();
 }
 
 // 全描画
 function renderAll() {
   renderTabs();
 
-  // 種類数ラジオ反映
   const list = lists[currentListIndex];
   document.querySelectorAll("input[name='typeCount']").forEach(radio => {
     radio.checked = Number(radio.value) === list.typeCount;
