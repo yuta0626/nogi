@@ -277,12 +277,42 @@ function createRow(name, gen) {
     checkbox.type = "checkbox";
     checkbox.checked = list.data[name].items[i].checked;
 
-    const number = document.createElement("input");
-    number.type = "number";
-    number.min = 0;
-    number.style.width = "50px";
-    number.disabled = !checkbox.checked;
-    number.value = list.data[name].items[i].count;
+function createNumberInput(checked, value) {
+  const num = document.createElement("input");
+  num.type = "number";
+  num.min = 0;
+  num.style.width = "50px";
+  num.disabled = !checked;
+  num.value = value;
+  return num;
+}
+
+let number = createNumberInput(list.data[name].items[i].checked,
+                               list.data[name].items[i].count);
+
+checkbox.addEventListener("change", () => {
+  backupData();
+  list.data[name].items[i].checked = checkbox.checked;
+
+  // iPhone Safari 対応：input を再生成して差し替える
+  const newNumber = createNumberInput(checkbox.checked, number.value);
+  number.replaceWith(newNumber);
+  number = newNumber;
+
+  if (!checkbox.checked) {
+    number.value = "";
+    list.data[name].items[i].count = "";
+  }
+
+  saveData();
+});
+
+number.addEventListener("input", () => {
+  backupData();
+  list.data[name].items[i].count = number.value;
+  saveData();
+});
+
 
     checkbox.addEventListener("change", () => {
       backupData();
