@@ -14,6 +14,25 @@
   .bg-5th { background-color: #ffd6e7; }
   .bg-6th { background-color: #ccf5cc; }
 
+  .tab-area {
+    margin-bottom: 20px;
+  }
+  .tab {
+    display: inline-block;
+    padding: 8px 12px;
+    margin-right: 5px;
+    border: 1px solid #aaa;
+    background: #eee;
+    cursor: pointer;
+  }
+  .tab.active {
+    background: #ddd;
+    font-weight: bold;
+  }
+  .tab input {
+    width: 80px;
+  }
+
   .setting-box {
     margin-bottom: 20px;
     padding: 10px;
@@ -26,10 +45,14 @@
 
 <h2>所持グッズ管理（乃木坂3〜6期生）</h2>
 
+<!-- タブ -->
+<div class="tab-area" id="tabArea"></div>
+<button id="addListBtn">＋ 新規リスト</button>
+
 <!-- 種類数設定 -->
 <div class="setting-box">
-  <h3>種類数の設定</h3>
-  <label><input type="radio" name="typeCount" value="3" checked> 3種</label>
+  <h3>種類数の設定（リストごとに独立）</h3>
+  <label><input type="radio" name="typeCount" value="3"> 3種</label>
   <label><input type="radio" name="typeCount" value="4"> 4種</label>
   <label><input type="radio" name="typeCount" value="5"> 5種</label>
 </div>
@@ -50,101 +73,115 @@
 </table>
 
 <script>
-// 3期生
-const members3 = [
-  "伊藤理々杏",
-  "岩本蓮加",
-  "吉田綾乃クリスティー"
-];
+// 期別メンバー
+const members3 = ["伊藤理々杏","岩本蓮加","吉田綾乃クリスティー"];
+const members4 = ["遠藤さくら","賀喜遥香","金川紗耶","黒見明香","柴田柚菜","田村真佑","筒井あやめ","林瑠奈","弓木奈於"];
+const members5 = ["五百城茉央","池田瑛紗","一ノ瀬美空","井上和","岡本姫奈","小川彩","奥田いろは","川﨑桜","菅原咲月","冨里奈央","中西アルノ"];
+const members6 = ["愛宕心響","大越ひなの","小津玲奈","海邉朱莉","川端晃菜","鈴木佑捺","瀬戸口心月","長嶋凛桜","増田三莉音","森平麗心","矢田萌華"];
 
-// 4期生
-const members4 = [
-  "遠藤さくら",
-  "賀喜遥香",
-  "金川紗耶",
-  "黒見明香",
-  "柴田柚菜",
-  "田村真佑",
-  "筒井あやめ",
-  "林瑠奈",
-  "弓木奈於"
-];
-
-// 5期生
-const members5 = [
-  "五百城茉央",
-  "池田瑛紗",
-  "一ノ瀬美空",
-  "井上和",
-  "岡本姫奈",
-  "小川彩",
-  "奥田いろは",
-  "川﨑桜",
-  "菅原咲月",
-  "冨里奈央",
-  "中西アルノ"
-];
-
-// 6期生
-const members6 = [
-  "愛宕心響",
-  "大越ひなの",
-  "小津玲奈",
-  "海邉朱莉",
-  "川端晃菜",
-  "鈴木佑捺",
-  "瀬戸口心月",
-  "長嶋凛桜",
-  "増田三莉音",
-  "森平麗心",
-  "矢田萌華"
-];
-
-// 期別背景色マップ
 const generationMap = {};
 members3.forEach(n => generationMap[n] = "bg-3rd");
 members4.forEach(n => generationMap[n] = "bg-4th");
 members5.forEach(n => generationMap[n] = "bg-5th");
 members6.forEach(n => generationMap[n] = "bg-6th");
 
-// 全メンバー
 const people = [...members3, ...members4, ...members5, ...members6];
 
-// 種類名（初期値）
-let typeNames = ["A", "B", "C", "D", "E"];
+// 複数リスト管理
+let lists = [
+  {
+    name: "通常",
+    typeCount: 3,
+    typeNames: ["A","B","C"],
+  }
+];
 
-// 種類数
-let typeCount = 3;
+let currentListIndex = 0;
 
-// 種類名入力欄を生成
+// タブ描画
+function renderTabs() {
+  const area = document.getElementById("tabArea");
+  area.innerHTML = "";
+
+  lists.forEach((list, index) => {
+    const tab = document.createElement("div");
+    tab.className = "tab" + (index === currentListIndex ? " active" : "");
+
+    const input = document.createElement("input");
+    input.value = list.name;
+    input.addEventListener("input", () => {
+      list.name = input.value;
+    });
+
+    tab.appendChild(input);
+
+    tab.addEventListener("click", () => {
+      currentListIndex = index;
+      renderAll();
+    });
+
+    area.appendChild(tab);
+  });
+}
+
+// 新規リスト追加
+document.getElementById("addListBtn").addEventListener("click", () => {
+  lists.push({
+    name: "新規リスト",
+    typeCount: 3,
+    typeNames: ["A","B","C"]
+  });
+  currentListIndex = lists.length - 1;
+  renderAll();
+});
+
+// 種類名入力欄
 function renderTypeNameInputs() {
   const box = document.getElementById("typeNameInputs");
   box.innerHTML = "";
 
-  for (let i = 0; i < typeCount; i++) {
+  const list = lists[currentListIndex];
+
+  for (let i = 0; i < list.typeCount; i++) {
     const div = document.createElement("div");
-    div.innerHTML = `${i+1}種名：<input type="text" value="${typeNames[i]}" data-index="${i}">`;
+    div.innerHTML = `${i+1}種名：<input type="text" value="${list.typeNames[i]}" data-index="${i}">`;
     box.appendChild(div);
   }
 
-  // 入力変更イベント
   box.querySelectorAll("input").forEach(input => {
     input.addEventListener("input", () => {
       const idx = input.dataset.index;
-      typeNames[idx] = input.value;
+      lists[currentListIndex].typeNames[idx] = input.value;
       renderTable();
     });
   });
 }
 
-// ヘッダー生成
+// 種類数設定
+document.querySelectorAll("input[name='typeCount']").forEach(radio => {
+  radio.addEventListener("change", () => {
+    const list = lists[currentListIndex];
+    list.typeCount = Number(radio.value);
+
+    // 種類名を補完
+    while (list.typeNames.length < list.typeCount) {
+      list.typeNames.push("新種");
+    }
+
+    renderAll();
+  });
+});
+
+// ヘッダー描画
 function renderHeader() {
   const header = document.getElementById("headerRow");
   header.innerHTML = "<th>人物名</th>";
 
-  for (let i = 0; i < typeCount; i++) {
+  const list = lists[currentListIndex];
+
+  for (let i = 0; i < list.typeCount; i++) {
     const th = document.createElement("th");
-    th.textContent = typeNames[i];
+    th.textContent = list.typeNames[i];
     header.appendChild(th);
   }
 }
@@ -158,7 +195,9 @@ function createRow(name) {
   nameCell.classList.add(generationMap[name]);
   tr.appendChild(nameCell);
 
-  for (let i = 0; i < typeCount; i++) {
+  const list = lists[currentListIndex];
+
+  for (let i = 0; i < list.typeCount; i++) {
     const td = document.createElement("td");
 
     const checkbox = document.createElement("input");
@@ -193,18 +232,22 @@ function renderTable() {
   people.forEach(p => body.appendChild(createRow(p)));
 }
 
-// 種類数変更イベント
-document.querySelectorAll("input[name='typeCount']").forEach(radio => {
-  radio.addEventListener("change", () => {
-    typeCount = Number(radio.value);
-    renderTypeNameInputs();
-    renderTable();
+// 全描画
+function renderAll() {
+  renderTabs();
+
+  // 種類数ラジオ反映
+  const list = lists[currentListIndex];
+  document.querySelectorAll("input[name='typeCount']").forEach(radio => {
+    radio.checked = Number(radio.value) === list.typeCount;
   });
-});
+
+  renderTypeNameInputs();
+  renderTable();
+}
 
 // 初期描画
-renderTypeNameInputs();
-renderTable();
+renderAll();
 </script>
 
 </body>
