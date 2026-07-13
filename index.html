@@ -48,18 +48,16 @@
     width: 80px;
   }
 
-  .setting-box {
+  .setting-box, .add-member-box {
     margin-bottom: 20px;
     padding: 10px;
     border: 1px solid #aaa;
     background: #f9f9f9;
   }
 
-  .add-member-box {
+  #undoBtn {
     margin-bottom: 20px;
-    padding: 10px;
-    border: 1px solid #aaa;
-    background: #eef;
+    padding: 8px 12px;
   }
 </style>
 </head>
@@ -67,23 +65,11 @@
 
 <h2>所持グッズ管理（乃木坂3〜6期生）</h2>
 
+<button id="undoBtn">⟲ 1つ戻る</button>
+
 <!-- タブ -->
 <div class="tab-area" id="tabArea"></div>
 <button id="addListBtn">＋ 新規リスト</button>
-
-<!-- メンバー追加 -->
-<div class="add-member-box">
-  <h3>メンバー追加（このリスト専用）</h3>
-  名前：<input type="text" id="newMemberName">
-  期別：
-  <select id="newMemberGen">
-    <option value="3">3期</option>
-    <option value="4">4期</option>
-    <option value="5">5期</option>
-    <option value="6">6期</option>
-  </select>
-  <button id="addMemberBtn">追加</button>
-</div>
 
 <!-- 種類数設定 -->
 <div class="setting-box">
@@ -131,17 +117,31 @@ let lists = JSON.parse(localStorage.getItem("nogiLists")) || [
     name: "通常",
     typeCount: 3,
     typeNames: ["A","B","C"],
-    members: JSON.parse(JSON.stringify(defaultMembers)), // 期別ごとに保持
-    data: {} // メンバーごとのデータ
+    members: JSON.parse(JSON.stringify(defaultMembers)),
+    data: {}
   }
 ];
+
+// バックアップ
+let backup = JSON.parse(localStorage.getItem("nogiLists_backup")) || null;
 
 let currentListIndex = 0;
 
 // 保存
 function saveData() {
+  localStorage.setItem("nogiLists_backup", JSON.stringify(lists)); // バックアップ
   localStorage.setItem("nogiLists", JSON.stringify(lists));
 }
+
+// 戻る
+document.getElementById("undoBtn").addEventListener("click", () => {
+  const backupData = localStorage.getItem("nogiLists_backup");
+  if (backupData) {
+    lists = JSON.parse(backupData);
+    saveData();
+    renderAll();
+  }
+});
 
 // タブ描画
 function renderTabs() {
@@ -170,32 +170,16 @@ function renderTabs() {
   });
 }
 
-// 新規リスト追加
+// 新規リスト追加（全メンバー表示）
 document.getElementById("addListBtn").addEventListener("click", () => {
   lists.push({
     name: "新規リスト",
     typeCount: 3,
     typeNames: ["A","B","C"],
-    members: JSON.parse(JSON.stringify(defaultMembers)),
+    members: JSON.parse(JSON.stringify(defaultMembers)), // 全員表示
     data: {}
   });
   currentListIndex = lists.length - 1;
-  saveData();
-  renderAll();
-});
-
-// メンバー追加
-document.getElementById("addMemberBtn").addEventListener("click", () => {
-  const name = document.getElementById("newMemberName").value.trim();
-  const gen = Number(document.getElementById("newMemberGen").value);
-
-  if (!name) return;
-
-  const list = lists[currentListIndex];
-  if (!list.members[gen].includes(name)) {
-    list.members[gen].push(name);
-  }
-
   saveData();
   renderAll();
 });
