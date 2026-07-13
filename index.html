@@ -9,32 +9,41 @@
   th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
 
   /* 期別背景色 */
-  .bg-3rd { background-color: #cceeff; } /* 水色 */
-  .bg-4th { background-color: #ffddaa; } /* 橙 */
-  .bg-5th { background-color: #ffd6e7; } /* ピンク */
-  .bg-6th { background-color: #ccf5cc; } /* 緑 */
+  .bg-3rd { background-color: #cceeff; }
+  .bg-4th { background-color: #ffddaa; }
+  .bg-5th { background-color: #ffd6e7; }
+  .bg-6th { background-color: #ccf5cc; }
 
-  .toggle-area { margin-bottom: 15px; }
+  .setting-box {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #aaa;
+    background: #f9f9f9;
+  }
 </style>
 </head>
 <body>
 
 <h2>所持グッズ管理（乃木坂3〜6期生）</h2>
 
-<div class="toggle-area">
-  <label><input type="checkbox" id="toggleD" checked> D を表示</label>
-  <label style="margin-left: 10px;"><input type="checkbox" id="toggleE" checked> E を表示</label>
+<!-- 種類数設定 -->
+<div class="setting-box">
+  <h3>種類数の設定</h3>
+  <label><input type="radio" name="typeCount" value="3" checked> 3種</label>
+  <label><input type="radio" name="typeCount" value="4"> 4種</label>
+  <label><input type="radio" name="typeCount" value="5"> 5種</label>
+</div>
+
+<!-- 種類名設定 -->
+<div class="setting-box">
+  <h3>種類名の設定</h3>
+  <div id="typeNameInputs"></div>
 </div>
 
 <table id="goodsTable">
   <thead>
-    <tr>
+    <tr id="headerRow">
       <th>人物名</th>
-      <th class="colA">A</th>
-      <th class="colB">B</th>
-      <th class="colC">C</th>
-      <th class="colD">D</th>
-      <th class="colE">E</th>
     </tr>
   </thead>
   <tbody id="tableBody"></tbody>
@@ -91,30 +100,66 @@ const members6 = [
   "矢田萌華"
 ];
 
-// 期別を判定するための辞書
+// 期別背景色マップ
 const generationMap = {};
 members3.forEach(n => generationMap[n] = "bg-3rd");
 members4.forEach(n => generationMap[n] = "bg-4th");
 members5.forEach(n => generationMap[n] = "bg-5th");
 members6.forEach(n => generationMap[n] = "bg-6th");
 
-// 全期生を結合
+// 全メンバー
 const people = [...members3, ...members4, ...members5, ...members6];
 
+// 種類名（初期値）
+let typeNames = ["A", "B", "C", "D", "E"];
+
+// 種類数
+let typeCount = 3;
+
+// 種類名入力欄を生成
+function renderTypeNameInputs() {
+  const box = document.getElementById("typeNameInputs");
+  box.innerHTML = "";
+
+  for (let i = 0; i < typeCount; i++) {
+    const div = document.createElement("div");
+    div.innerHTML = `${i+1}種名：<input type="text" value="${typeNames[i]}" data-index="${i}">`;
+    box.appendChild(div);
+  }
+
+  // 入力変更イベント
+  box.querySelectorAll("input").forEach(input => {
+    input.addEventListener("input", () => {
+      const idx = input.dataset.index;
+      typeNames[idx] = input.value;
+      renderTable();
+    });
+  });
+}
+
+// ヘッダー生成
+function renderHeader() {
+  const header = document.getElementById("headerRow");
+  header.innerHTML = "<th>人物名</th>";
+
+  for (let i = 0; i < typeCount; i++) {
+    const th = document.createElement("th");
+    th.textContent = typeNames[i];
+    header.appendChild(th);
+  }
+}
+
+// 行生成
 function createRow(name) {
   const tr = document.createElement("tr");
 
   const nameCell = document.createElement("td");
   nameCell.textContent = name;
-
-  // 期別背景色を適用
   nameCell.classList.add(generationMap[name]);
-
   tr.appendChild(nameCell);
 
-  ["A", "B", "C", "D", "E"].forEach(type => {
+  for (let i = 0; i < typeCount; i++) {
     const td = document.createElement("td");
-    td.classList.add("col" + type);
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -133,31 +178,33 @@ function createRow(name) {
     td.appendChild(checkbox);
     td.appendChild(number);
     tr.appendChild(td);
-  });
+  }
 
   return tr;
 }
 
+// 表描画
 function renderTable() {
+  renderHeader();
+
   const body = document.getElementById("tableBody");
   body.innerHTML = "";
+
   people.forEach(p => body.appendChild(createRow(p)));
 }
 
+// 種類数変更イベント
+document.querySelectorAll("input[name='typeCount']").forEach(radio => {
+  radio.addEventListener("change", () => {
+    typeCount = Number(radio.value);
+    renderTypeNameInputs();
+    renderTable();
+  });
+});
+
+// 初期描画
+renderTypeNameInputs();
 renderTable();
-
-// D/E の表示切り替え
-document.getElementById("toggleD").addEventListener("change", e => {
-  document.querySelectorAll(".colD").forEach(col => {
-    col.style.display = e.target.checked ? "" : "none";
-  });
-});
-
-document.getElementById("toggleE").addEventListener("change", e => {
-  document.querySelectorAll(".colE").forEach(col => {
-    col.style.display = e.target.checked ? "" : "none";
-  });
-});
 </script>
 
 </body>
