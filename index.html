@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>所持グッズ管理（乃木坂3〜6期生）</title>
+<title>生写真管理</title>
 <style>
   body { font-family: sans-serif; padding: 20px; }
   table { border-collapse: collapse; width: 100%; margin-top: 20px; }
@@ -48,15 +48,26 @@
     padding: 10px;
     border: 1px solid #aaa;
     background: #f9f9f9;
+    font-size: 14px; /* ← 少し小さく */
   }
 
   #undoBtn { margin-bottom: 20px; padding: 8px 12px; }
   #deleteTabBtn { margin-left: 10px; padding: 8px 12px; }
+
+  /* ロック欄 */
+  .lock-cell {
+    text-align: center;
+  }
+
+  /* チェックと数字を中央寄せ */
+  .center-cell {
+    text-align: center;
+  }
 </style>
 </head>
 <body>
 
-<h2>所持グッズ管理（乃木坂3〜6期生）</h2>
+<h2>生写真管理</h2>
 
 <button id="undoBtn">⟲ 1つ戻る</button>
 
@@ -65,7 +76,7 @@
 <button id="addListBtn">＋ 新規リスト</button>
 <button id="deleteTabBtn">タブ削除</button>
 
-<!-- タブ名編集（スマホ対応） -->
+<!-- タブ名編集 -->
 <div class="setting-box">
   <h3>タブ名編集</h3>
   <input type="text" id="editTabName">
@@ -74,7 +85,7 @@
 
 <!-- 種類数設定 -->
 <div class="setting-box">
-  <h3>種類数の設定（リストごとに独立）</h3>
+  <h3>種類数の設定</h3>
   <label><input type="radio" name="typeCount" value="3"> 3種</label>
   <label><input type="radio" name="typeCount" value="4"> 4種</label>
   <label><input type="radio" name="typeCount" value="5"> 5種</label>
@@ -89,6 +100,7 @@
 <table id="goodsTable">
   <thead>
     <tr id="headerRow">
+      <th>ロック</th>
       <th>人物名</th>
     </tr>
   </thead>
@@ -136,7 +148,7 @@ document.getElementById("undoBtn").addEventListener("click", () => {
   }
 });
 
-// タブ描画（スマホ対応：タブ内に input を置かない）
+// タブ描画
 function renderTabs() {
   const area = document.getElementById("tabArea");
   area.innerHTML = "";
@@ -173,7 +185,7 @@ document.getElementById("deleteTabBtn").addEventListener("click", () => {
   renderAll();
 });
 
-// 新規タブ（全メンバー表示）
+// 新規タブ
 document.getElementById("addListBtn").addEventListener("click", () => {
   backupData();
   lists.push({
@@ -231,7 +243,7 @@ document.querySelectorAll("input[name='typeCount']").forEach(radio => {
 // ヘッダー
 function renderHeader() {
   const header = document.getElementById("headerRow");
-  header.innerHTML = "<th>人物名</th>";
+  header.innerHTML = "<th>ロック</th><th>人物名</th>";
 
   const list = lists[currentListIndex];
 
@@ -250,12 +262,30 @@ function renderHeader() {
 function createRow(name, gen) {
   const tr = document.createElement("tr");
   const list = lists[currentListIndex];
-  if (!list.data[name]) list.data[name] = { favorite: false, items: [] };
 
+  if (!list.data[name]) list.data[name] = { favorite: false, lock: false, items: [] };
+
+  // ロック欄
+  const lockTd = document.createElement("td");
+  lockTd.className = "lock-cell";
+  const lockCheck = document.createElement("input");
+  lockCheck.type = "checkbox";
+  lockCheck.checked = list.data[name].lock;
+  lockCheck.addEventListener("change", () => {
+    backupData();
+    list.data[name].lock = lockCheck.checked;
+    saveData();
+    renderTable();
+  });
+  lockTd.appendChild(lockCheck);
+  tr.appendChild(lockTd);
+
+  // 名前欄
   const fav = document.createElement("span");
   fav.textContent = "★";
   fav.className = "favorite" + (list.data[name].favorite ? " checked" : "");
   fav.addEventListener("click", () => {
+    if (list.data[name].lock) return;
     backupData();
     list.data[name].favorite = !list.data[name].favorite;
     fav.classList.toggle("checked");
@@ -268,53 +298,27 @@ function createRow(name, gen) {
   nameCell.appendChild(document.createTextNode(name));
   tr.appendChild(nameCell);
 
+  // 種類欄
   for (let i = 0; i < list.typeCount; i++) {
     if (!list.data[name].items[i]) list.data[name].items[i] = { checked: false, count: "" };
 
     const td = document.createElement("td");
+    td.className = "center-cell";
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = list.data[name].items[i].checked;
+    checkbox.disabled = list.data[name].lock;
 
-function createNumberInput(checked, value) {
-  const num = document.createElement("input");
-  num.type = "number";
-  num.min = 0;
-  num.style.width = "50px";
-  num.disabled = !checked;
-  num.value = value;
-  return num;
-}
-
-let number = createNumberInput(list.data[name].items[i].checked,
-                               list.data[name].items[i].count);
-
-checkbox.addEventListener("change", () => {
-  backupData();
-  list.data[name].items[i].checked = checkbox.checked;
-
-  // iPhone Safari 対応：input を再生成して差し替える
-  const newNumber = createNumberInput(checkbox.checked, number.value);
-  number.replaceWith(newNumber);
-  number = newNumber;
-
-  if (!checkbox.checked) {
-    number.value = "";
-    list.data[name].items[i].count = "";
-  }
-
-  saveData();
-});
-
-number.addEventListener("input", () => {
-  backupData();
-  list.data[name].items[i].count = number.value;
-  saveData();
-});
-
+    const number = document.createElement("input");
+    number.type = "number";
+    number.min = 0;
+    number.style.width = "50px";
+    number.disabled = !checkbox.checked || list.data[name].lock;
+    number.value = list.data[name].items[i].count;
 
     checkbox.addEventListener("change", () => {
+      if (list.data[name].lock) return;
       backupData();
       list.data[name].items[i].checked = checkbox.checked;
       number.disabled = !checkbox.checked;
@@ -326,6 +330,7 @@ number.addEventListener("input", () => {
     });
 
     number.addEventListener("input", () => {
+      if (list.data[name].lock) return;
       backupData();
       list.data[name].items[i].count = number.value;
       saveData();
@@ -336,10 +341,13 @@ number.addEventListener("input", () => {
     tr.appendChild(td);
   }
 
+  // 削除欄
   const delTd = document.createElement("td");
   const delBtn = document.createElement("button");
   delBtn.textContent = "削除";
+  delBtn.disabled = list.data[name].lock;
   delBtn.addEventListener("click", () => {
+    if (list.data[name].lock) return;
     backupData();
     list.members[gen] = list.members[gen].filter(m => m !== name);
     delete list.data[name];
@@ -372,7 +380,6 @@ function renderTable() {
 function renderAll() {
   renderTabs();
 
-  // タブ名編集欄に反映
   document.getElementById("editTabName").value = lists[currentListIndex].name;
 
   const list = lists[currentListIndex];
