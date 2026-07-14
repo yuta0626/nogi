@@ -8,13 +8,11 @@
   table { border-collapse: collapse; width: 100%; margin-top: 20px; }
   th, td { border: 1px solid #ccc; padding: 8px; }
 
-  /* 期別背景色 */
   .bg-3rd { background-color: #cceeff; }
   .bg-4th { background-color: #ffddaa; }
   .bg-5th { background-color: #ffd6e7; }
   .bg-6th { background-color: #ccf5cc; }
 
-  /* お気に入り（★） */
   .favorite {
     cursor: pointer;
     font-size: 16px;
@@ -48,20 +46,19 @@
     padding: 10px;
     border: 1px solid #aaa;
     background: #f9f9f9;
-    font-size: 14px; /* ← 少し小さく */
+    font-size: 14px;
   }
 
   #undoBtn { margin-bottom: 20px; padding: 8px 12px; }
   #deleteTabBtn { margin-left: 10px; padding: 8px 12px; }
 
-  /* ロック欄 */
-  .lock-cell {
-    text-align: center;
-  }
+  .lock-cell { text-align: center; }
+  .center-cell { text-align: center; }
 
-  /* チェックと数字を中央寄せ */
-  .center-cell {
-    text-align: center;
+  /* お気に入りフィルター */
+  #favFilterBtn {
+    margin-bottom: 20px;
+    padding: 8px 12px;
   }
 </style>
 </head>
@@ -82,6 +79,9 @@
   <input type="text" id="editTabName">
   <button id="saveTabNameBtn">変更</button>
 </div>
+
+<!-- お気に入りフィルター -->
+<button id="favFilterBtn">★お気に入りのみ表示</button>
 
 <!-- 種類数設定 -->
 <div class="setting-box">
@@ -124,7 +124,8 @@ let lists = JSON.parse(localStorage.getItem("nogiLists")) || [
     typeCount: 3,
     typeNames: ["A","B","C"],
     members: JSON.parse(JSON.stringify(defaultMembers)),
-    data: {}
+    data: {},
+    favFilter: false   // ← お気に入りフィルター状態
   }
 ];
 
@@ -193,9 +194,19 @@ document.getElementById("addListBtn").addEventListener("click", () => {
     typeCount: 3,
     typeNames: ["A","B","C"],
     members: JSON.parse(JSON.stringify(defaultMembers)),
-    data: {}
+    data: {},
+    favFilter: false
   });
   currentListIndex = lists.length - 1;
+  saveData();
+  renderAll();
+});
+
+// お気に入りフィルター
+document.getElementById("favFilterBtn").addEventListener("click", () => {
+  backupData();
+  const list = lists[currentListIndex];
+  list.favFilter = !list.favFilter;
   saveData();
   renderAll();
 });
@@ -265,6 +276,9 @@ function createRow(name, gen) {
 
   if (!list.data[name]) list.data[name] = { favorite: false, lock: false, items: [] };
 
+  // お気に入りフィルター
+  if (list.favFilter && !list.data[name].favorite) return null;
+
   // ロック欄
   const lockTd = document.createElement("td");
   lockTd.className = "lock-cell";
@@ -290,6 +304,7 @@ function createRow(name, gen) {
     list.data[name].favorite = !list.data[name].favorite;
     fav.classList.toggle("checked");
     saveData();
+    renderTable();
   });
 
   const nameCell = document.createElement("td");
@@ -315,7 +330,6 @@ function createRow(name, gen) {
     number.style.width = "50px";
     number.value = list.data[name].items[i].count;
 
-    // チェックボックス（ロック時は処理だけ無効化）
     checkbox.addEventListener("change", () => {
       if (list.data[name].lock) {
         checkbox.checked = list.data[name].items[i].checked;
@@ -331,7 +345,6 @@ function createRow(name, gen) {
       saveData();
     });
 
-    // 数字入力（ロック時は処理だけ無効化）
     number.addEventListener("input", () => {
       if (list.data[name].lock) {
         number.value = list.data[name].items[i].count;
@@ -347,7 +360,7 @@ function createRow(name, gen) {
     tr.appendChild(td);
   }
 
-  // 削除欄（ロック時は処理だけ無効化）
+  // 削除欄
   const delTd = document.createElement("td");
   const delBtn = document.createElement("button");
   delBtn.textContent = "削除";
@@ -376,9 +389,14 @@ function renderTable() {
 
   Object.keys(list.members).forEach(gen => {
     list.members[gen].forEach(name => {
-      body.appendChild(createRow(name, Number(gen)));
+      const row = createRow(name, Number(gen));
+      if (row) body.appendChild(row);
     });
   });
+
+  // ボタンの表示切り替え
+  document.getElementById("favFilterBtn").textContent =
+    list.favFilter ? "全員表示" : "★お気に入りのみ表示";
 }
 
 // 全描画
