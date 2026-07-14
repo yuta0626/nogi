@@ -49,13 +49,20 @@
     font-size: 14px;
   }
 
+  /* 横並びレイアウト */
+  .flex-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
   #undoBtn { margin-bottom: 20px; padding: 8px 12px; }
   #deleteTabBtn { margin-left: 10px; padding: 8px 12px; }
 
   .lock-cell { text-align: center; }
   .center-cell { text-align: center; }
 
-  /* お気に入りフィルターボタン（ヘッダー内） */
   .fav-filter-btn {
     padding: 4px 8px;
     font-size: 12px;
@@ -81,25 +88,29 @@
   <button id="saveTabNameBtn">変更</button>
 </div>
 
-<!-- 種類数設定 -->
-<div class="setting-box">
-  <h3>種類数の設定</h3>
-  <label><input type="radio" name="typeCount" value="3"> 3種</label>
-  <label><input type="radio" name="typeCount" value="4"> 4種</label>
-  <label><input type="radio" name="typeCount" value="5"> 5種</label>
-</div>
+<!-- 種類（横並び） -->
+<div class="setting-box flex-row">
+  <div>
+    <h3>種類</h3>
+    <label><input type="radio" name="typeCount" value="3"> 3種</label><br>
+    <label><input type="radio" name="typeCount" value="4"> 4種</label><br>
+    <label><input type="radio" name="typeCount" value="5"> 5種</label>
+  </div>
 
-<!-- 種類名設定 -->
-<div class="setting-box">
-  <h3>種類名の設定</h3>
-  <div id="typeNameInputs"></div>
+  <div>
+    <h3>種類名</h3>
+    <div id="typeNameInputs"></div>
+  </div>
 </div>
 
 <table id="goodsTable">
   <thead>
     <tr id="headerRow">
       <th>ロック</th>
-      <th id="memberHeader">メンバー</th>
+      <th id="memberHeader">
+        メンバー
+        <button id="favFilterBtn" class="fav-filter-btn"></button>
+      </th>
     </tr>
   </thead>
   <tbody id="tableBody"></tbody>
