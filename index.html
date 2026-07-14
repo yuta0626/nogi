@@ -8,11 +8,13 @@
   table { border-collapse: collapse; width: 100%; margin-top: 20px; }
   th, td { border: 1px solid #ccc; padding: 8px; }
 
+  /* 期別背景色 */
   .bg-3rd { background-color: #cceeff; }
   .bg-4th { background-color: #ffddaa; }
   .bg-5th { background-color: #ffd6e7; }
   .bg-6th { background-color: #ccf5cc; }
 
+  /* お気に入り（★） */
   .favorite {
     cursor: pointer;
     font-size: 16px;
@@ -63,17 +65,25 @@
   .lock-cell { text-align: center; }
   .center-cell { text-align: center; }
 
+  /* お気に入りフィルターボタン（ヘッダー内） */
   .fav-filter-btn {
     padding: 4px 8px;
     font-size: 12px;
     margin-left: 8px;
   }
 
-/* 隔行の薄い色（期別背景色の上に重ねる） */
-#tableBody tr:nth-child(even) td {
-  background-color: rgba(0, 0, 0, 0.05); /* 5%の薄いグレー */
-}
+  /* 隔行色（メンバー列以外） */
+  #tableBody tr:nth-child(even) td:not(.name-cell) {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
 
+  /* 数字入力欄の背景を統一して浮かないようにする */
+  input[type="number"] {
+    background-color: rgba(255, 255, 255, 0.85);
+    border: 1px solid #ccc;
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
 </style>
 </head>
 <body>
@@ -314,7 +324,7 @@ function createRow(name, gen) {
   lockTd.appendChild(lockCheck);
   tr.appendChild(lockTd);
 
-  // 名前欄
+  // 名前欄（メンバー列）
   const fav = document.createElement("span");
   fav.textContent = "★";
   fav.className = "favorite" + (list.data[name].favorite ? " checked" : "");
