@@ -308,17 +308,19 @@ function createRow(name, gen) {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = list.data[name].items[i].checked;
-    checkbox.disabled = list.data[name].lock;
 
     const number = document.createElement("input");
     number.type = "number";
     number.min = 0;
     number.style.width = "50px";
-    number.disabled = !checkbox.checked || list.data[name].lock;
     number.value = list.data[name].items[i].count;
 
+    // チェックボックス（ロック時は処理だけ無効化）
     checkbox.addEventListener("change", () => {
-      if (list.data[name].lock) return;
+      if (list.data[name].lock) {
+        checkbox.checked = list.data[name].items[i].checked;
+        return;
+      }
       backupData();
       list.data[name].items[i].checked = checkbox.checked;
       number.disabled = !checkbox.checked;
@@ -329,8 +331,12 @@ function createRow(name, gen) {
       saveData();
     });
 
+    // 数字入力（ロック時は処理だけ無効化）
     number.addEventListener("input", () => {
-      if (list.data[name].lock) return;
+      if (list.data[name].lock) {
+        number.value = list.data[name].items[i].count;
+        return;
+      }
       backupData();
       list.data[name].items[i].count = number.value;
       saveData();
@@ -341,11 +347,10 @@ function createRow(name, gen) {
     tr.appendChild(td);
   }
 
-  // 削除欄
+  // 削除欄（ロック時は処理だけ無効化）
   const delTd = document.createElement("td");
   const delBtn = document.createElement("button");
   delBtn.textContent = "削除";
-  delBtn.disabled = list.data[name].lock;
   delBtn.addEventListener("click", () => {
     if (list.data[name].lock) return;
     backupData();
