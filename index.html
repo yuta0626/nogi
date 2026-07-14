@@ -55,10 +55,11 @@
   .lock-cell { text-align: center; }
   .center-cell { text-align: center; }
 
-  /* お気に入りフィルター */
-  #favFilterBtn {
-    margin-bottom: 20px;
-    padding: 8px 12px;
+  /* お気に入りフィルターボタン（ヘッダー内） */
+  .fav-filter-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+    margin-left: 8px;
   }
 </style>
 </head>
@@ -80,9 +81,6 @@
   <button id="saveTabNameBtn">変更</button>
 </div>
 
-<!-- お気に入りフィルター -->
-<button id="favFilterBtn">★お気に入りのみ表示</button>
-
 <!-- 種類数設定 -->
 <div class="setting-box">
   <h3>種類数の設定</h3>
@@ -101,7 +99,7 @@
   <thead>
     <tr id="headerRow">
       <th>ロック</th>
-      <th>人物名</th>
+      <th id="memberHeader">メンバー</th>
     </tr>
   </thead>
   <tbody id="tableBody"></tbody>
@@ -125,7 +123,7 @@ let lists = JSON.parse(localStorage.getItem("nogiLists")) || [
     typeNames: ["A","B","C"],
     members: JSON.parse(JSON.stringify(defaultMembers)),
     data: {},
-    favFilter: false   // ← お気に入りフィルター状態
+    favFilter: false
   }
 ];
 
@@ -202,15 +200,6 @@ document.getElementById("addListBtn").addEventListener("click", () => {
   renderAll();
 });
 
-// お気に入りフィルター
-document.getElementById("favFilterBtn").addEventListener("click", () => {
-  backupData();
-  const list = lists[currentListIndex];
-  list.favFilter = !list.favFilter;
-  saveData();
-  renderAll();
-});
-
 // 種類名入力欄
 function renderTypeNameInputs() {
   const box = document.getElementById("typeNameInputs");
@@ -254,9 +243,23 @@ document.querySelectorAll("input[name='typeCount']").forEach(radio => {
 // ヘッダー
 function renderHeader() {
   const header = document.getElementById("headerRow");
-  header.innerHTML = "<th>ロック</th><th>人物名</th>";
+  header.innerHTML = `
+    <th>ロック</th>
+    <th id="memberHeader">
+      メンバー
+      <button id="favFilterBtn" class="fav-filter-btn"></button>
+    </th>
+  `;
 
   const list = lists[currentListIndex];
+  const favBtn = document.getElementById("favFilterBtn");
+  favBtn.textContent = list.favFilter ? "全員表示" : "★お気に入りのみ";
+  favBtn.addEventListener("click", () => {
+    backupData();
+    list.favFilter = !list.favFilter;
+    saveData();
+    renderTable();
+  });
 
   for (let i = 0; i < list.typeCount; i++) {
     const th = document.createElement("th");
@@ -393,10 +396,6 @@ function renderTable() {
       if (row) body.appendChild(row);
     });
   });
-
-  // ボタンの表示切り替え
-  document.getElementById("favFilterBtn").textContent =
-    list.favFilter ? "全員表示" : "★お気に入りのみ表示";
 }
 
 // 全描画
