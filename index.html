@@ -12,7 +12,7 @@
   }
   .tab-line {
     display: flex;
-    justify-content: space-between; /* これで「1つ戻る」が綺麗に右端へ */
+    justify-content: space-between;
     align-items: center;
     gap: 15px;
     flex-wrap: wrap;
@@ -41,7 +41,7 @@
     background-color: #ddd;
   }
 
-  /* テーブルのiPhone表示崩れ・潰れ対策（横スクロール化） */
+  /* テーブルのiPhone表示崩れ・潰れ対策 */
   .table-container {
     width: 100%;
     overflow-x: auto;
@@ -51,13 +51,13 @@
     border-radius: 4px;
   }
 
+  /* 5種のときのデフォルト設定は一切変更していません */
   table { 
     border-collapse: collapse; 
-    width: max-content; /* 👈 ここを変更：列幅の合計にピタッと合わせる */
+    width: 100%; 
+    min-width: 670px; 
     table-layout: fixed; 
   }
-  
-
   th, td { 
     border: 1px solid #ccc; 
     padding: 8px 4px; 
@@ -66,11 +66,11 @@
     box-sizing: border-box;
   }
 
-  /* クラスによる正確な列幅管理（合計: 85 + 145 + (75*5) + 65 = 670px） */
-  .col-lock { width: 85px; }    /* ボタンが収まるよう少し広めに */
-  .col-member { width: 145px; }  /* 吉田綾乃クリスティー対策 */
-  .col-type { width: 75px; }    /* 各種類（ポーズ）列 */
-  .col-delete { width: 65px; }  /* 削除列 */
+  /* クラスによる正確な列幅管理 */
+  .col-lock { width: 85px; }
+  .col-member { width: 145px; }
+  .col-type { width: 75px; }
+  .col-delete { width: 65px; }
 
   /* メンバー列の設定 */
   td.name-cell {
@@ -78,7 +78,7 @@
     white-space: nowrap;
   }
 
-  /* 種類セルのスタイル（Safariのバグ対策でインライン横並びに見直し） */
+  /* 種類セルのスタイル */
   td.type-cell {
     white-space: nowrap;
   }
@@ -119,13 +119,13 @@
     padding: 3px 4px;
     font-size: 11px;
     width: 100%;
-    max-width: 76px; /* col-lock(85px)の枠内に収まるサイズ */
+    max-width: 76px;
     white-space: nowrap;
     box-sizing: border-box;
     margin-top: 4px;
   }
   #favFilterBtn {
-    max-width: 110px; /* メンバー列のボタン用 */
+    max-width: 110px;
   }
 
   .bg-3rd { background-color: #cceeff; }
@@ -229,12 +229,11 @@ let lists=JSON.parse(localStorage.getItem("nogiLists"))||[
 ];
 let currentListIndex=0;
 
-// 複数回対応の履歴スタック
 let historyStack = JSON.parse(localStorage.getItem("nogiLists_history")) || [];
 
 function backupData(){
   historyStack.push(JSON.stringify(lists));
-  if(historyStack.length > 20) historyStack.shift(); // 直近20回まで巻き戻し可能
+  if(historyStack.length > 20) historyStack.shift();
   localStorage.setItem("nogiLists_history", JSON.stringify(historyStack));
 }
 function saveData(){localStorage.setItem("nogiLists",JSON.stringify(lists));}
@@ -354,6 +353,7 @@ function renderHeader(){
     saveData();renderTable();
   };
 
+  // グレー枠を作らず、選択された種類数分だけループを回します
   for(let i=0;i<list.typeCount;i++){
     const th=document.createElement("th");
     th.className = "col-type";
@@ -407,7 +407,7 @@ function createRow(name,gen){
   tdName.appendChild(document.createTextNode(name));
   tr.appendChild(tdName);
 
-  // 各種類（ポーズ）列
+  // 選択された種類数分だけ綺麗に列を生成
   for(let i=0;i<list.typeCount;i++){
     if(!list.data[name].items[i])list.data[name].items[i]={checked:false,count:""};
     const td=document.createElement("td");
@@ -463,10 +463,25 @@ function createRow(name,gen){
 }
 
 function renderTable(){
+  // 🛠️ 5種のときのCSS設定を壊さず、3種・4種のときだけ幅を動的にジャストサイズ化
+  const tableElem = document.querySelector("table");
+  const list=lists[currentListIndex];
+  if (tableElem) {
+    if (list.typeCount === 5) {
+      tableElem.style.width = "100%";
+      tableElem.style.minWidth = "670px";
+    } else if (list.typeCount === 4) {
+      tableElem.style.width = "595px"; /* 85 + 145 + (75*4) + 65 */
+      tableElem.style.minWidth = "595px";
+    } else if (list.typeCount === 3) {
+      tableElem.style.width = "520px"; /* 85 + 145 + (75*3) + 65 */
+      tableElem.style.minWidth = "520px";
+    }
+  }
+
   renderHeader();
   const body=document.getElementById("tableBody");
   body.innerHTML="";
-  const list=lists[currentListIndex];
 
   Object.keys(list.members).forEach(gen=>{
     list.members[gen].forEach(name=>{
