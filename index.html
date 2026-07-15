@@ -57,6 +57,7 @@
     width: 100%; 
     min-width: 670px; 
     table-layout: fixed; 
+    margin: 0 auto; /* 💡 表をページ中央に寄せる設定を追加 */
   }
   th, td { 
     border: 1px solid #ccc; 
@@ -353,7 +354,6 @@ function renderHeader(){
     saveData();renderTable();
   };
 
-  // 純粋に選ばれた種類数分だけヘッダーを作ります
   for(let i=0;i<list.typeCount;i++){
     const th=document.createElement("th");
     th.className = "col-type";
@@ -463,7 +463,6 @@ function createRow(name,gen){
 }
 
 function renderTable(){
-  // 🛠️ 【ここを大修正】3種・4種のときも5種と「完全に同じ拡大率」で連動させます
   const tableElem = document.querySelector("table");
   const list=lists[currentListIndex];
   if (tableElem) {
@@ -471,11 +470,9 @@ function renderTable(){
       tableElem.style.width = "100%";
       tableElem.style.minWidth = "670px";
     } else if (list.typeCount === 4) {
-      // 5種のとき（670px）に対する4種分（595px）の比率で画面幅に合わせて引き伸ばす
       tableElem.style.width = "calc(100% * 595 / 670)";
       tableElem.style.minWidth = "595px";
     } else if (list.typeCount === 3) {
-      // 5種のとき（670px）に対する3種分（520px）の比率で画面幅に合わせて引き伸ばす
       tableElem.style.width = "calc(100% * 520 / 670)";
       tableElem.style.minWidth = "520px";
     }
