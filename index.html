@@ -4,19 +4,76 @@
 <meta charset="UTF-8">
 <title>生写真管理</title>
 <style>
-  body { font-family: sans-serif; padding: 20px; }
+  body { font-family: sans-serif; padding: 20px; background-color: #fff; color: #333; }
 
-  /* 右上に戻るボタン */
-  #undoBtn {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    padding: 8px 12px;
-    z-index: 999;
+  /* コントロールパネル（タブの右、削除の上に配置） */
+  .control-panel {
+    margin-bottom: 20px;
+  }
+  .tab-line {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .tab-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .action-line {
+    display: flex;
+    gap: 8px;
   }
 
-  table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-  th, td { border: 1px solid #ccc; padding: 6px; }
+  #undoBtn {
+    padding: 6px 12px;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  #undoBtn:active {
+    background-color: #ddd;
+  }
+
+  /* テーブルのiPhone表示崩れ対策（横スクロール化） */
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+  th, td { border: 1px solid #ccc; padding: 6px; text-align: center; vertical-align: middle; }
+
+  /* 列幅の最適化（table-layout: fixed用） */
+  th, td { width: 75px; } /* 種類列のデフォルト幅 */
+  th:first-child, td:first-child { width: 55px; } /* ロック列 */
+  th:last-child, td:last-child { width: 65px; } /* 削除列 */
+
+  /* メンバー列は広め（吉田綾乃クリスティー対策） */
+  #memberHeader,
+  td.name-cell {
+    width: 150px;
+    white-space: nowrap;
+    text-align: left;
+  }
+
+  /* セル内のフレックスコンテナ（表示崩れ対策） */
+  .cell-container {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    box-sizing: border-box;
+  }
 
   /* 乃木坂カラーのヘッダー */
   thead th {
@@ -33,43 +90,15 @@
     gap: 6px;
   }
 
-  /* 列幅最適化（iPhone対応） */
-  th, td { width: 60px; } /* ← 種類列を超コンパクト化 */
-
-  /* メンバー列は広め（吉田綾乃クリスティー対策） */
-  #memberHeader,
-  td.name-cell {
-    width: 160px;
-    white-space: nowrap;
-  }
-
-  /* ロック列のチェックを完全中央寄せ */
-  .lock-cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  /* 種類列のチェック＋数字を1行に収める */
-  .center-cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2px;          /* ← 超コンパクト */
-    white-space: nowrap;
-  }
-
-  /* 数字欄をさらにコンパクト化（iPhone対応） */
+  /* 数字欄のコンパクト化（iPhone対応） */
   input[type="number"] {
-    width: 42px;       /* ← iPhoneでも折り返さない幅 */
+    width: 36px;
     background-color: rgba(255,255,255,0.85);
     border: 1px solid #ccc;
     padding: 2px 4px;
     border-radius: 4px;
     font-size: 16px;
   }
-
-  td.delete-cell { text-align: center; }
 
   .bg-3rd { background-color: #cceeff; }
   .bg-4th { background-color: #ffddaa; }
@@ -86,11 +115,9 @@
     text-shadow: -1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000;
   }
 
-  .tab-area { margin-bottom: 20px; }
   .tab {
     display: inline-block;
     padding: 8px 12px;
-    margin-right: 5px;
     border: 1px solid #aaa;
     background: #eee;
     cursor: pointer;
@@ -124,13 +151,18 @@
 </head>
 <body>
 
-<button id="undoBtn">⟲ 1つ戻る</button>
-
 <h2>生写真管理</h2>
 
-<div class="tab-area" id="tabArea"></div>
-<button id="addListBtn">＋ 新規リスト</button>
-<button id="deleteTabBtn">タブ削除</button>
+<div class="control-panel">
+  <div class="tab-line">
+    <div class="tab-area" id="tabArea"></div>
+    <button id="undoBtn">⟲ 1つ戻る</button>
+  </div>
+  <div class="action-line">
+    <button id="addListBtn">＋ 新規リスト</button>
+    <button id="deleteTabBtn">タブ削除</button>
+  </div>
+</div>
 
 <div class="setting-box">
   <h3>タブ名編集</h3>
@@ -152,12 +184,14 @@
   </div>
 </div>
 
-<table>
-  <thead>
-    <tr id="headerRow"></tr>
-  </thead>
-  <tbody id="tableBody"></tbody>
-</table>
+<div class="table-container">
+  <table>
+    <thead>
+      <tr id="headerRow"></tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
 
 <script>
 const defaultMembers={
@@ -174,12 +208,24 @@ let lists=JSON.parse(localStorage.getItem("nogiLists"))||[
 ];
 let currentListIndex=0;
 
-function backupData(){localStorage.setItem("nogiLists_backup",JSON.stringify(lists));}
+// 複数回対応の履歴スタック（LocalStorage同期）
+let historyStack = JSON.parse(localStorage.getItem("nogiLists_history")) || [];
+
+function backupData(){
+  historyStack.push(JSON.stringify(lists));
+  if(historyStack.length > 20) historyStack.shift(); // 最大20回まで保持
+  localStorage.setItem("nogiLists_history", JSON.stringify(historyStack));
+}
 function saveData(){localStorage.setItem("nogiLists",JSON.stringify(lists));}
 
 document.getElementById("undoBtn").onclick=()=>{
-  const b=localStorage.getItem("nogiLists_backup");
-  if(b){lists=JSON.parse(b);saveData();renderAll();}
+  if(historyStack.length > 0){
+    const b = historyStack.pop();
+    lists = JSON.parse(b);
+    saveData();
+    localStorage.setItem("nogiLists_history", JSON.stringify(historyStack));
+    renderAll();
+  }
 };
 
 function renderTabs(){
@@ -306,8 +352,10 @@ function createRow(name,gen){
 
   const tr=document.createElement("tr");
 
+  // ロック列
   const tdLock=document.createElement("td");
-  tdLock.className="lock-cell";
+  const lockWrapper=document.createElement("div");
+  lockWrapper.className="cell-container";
   const lock=document.createElement("input");
   lock.type="checkbox";
   lock.checked=list.data[name].lock;
@@ -316,9 +364,11 @@ function createRow(name,gen){
     list.data[name].lock=lock.checked;
     saveData();renderTable();
   };
-  tdLock.appendChild(lock);
+  lockWrapper.appendChild(lock);
+  tdLock.appendChild(lockWrapper);
   tr.appendChild(tdLock);
 
+  // メンバー名列
   const tdName=document.createElement("td");
   tdName.className="name-cell "+genColor[gen];
   const fav=document.createElement("span");
@@ -334,10 +384,12 @@ function createRow(name,gen){
   tdName.appendChild(document.createTextNode(name));
   tr.appendChild(tdName);
 
+  // 各種類（ポーズ）列
   for(let i=0;i<list.typeCount;i++){
     if(!list.data[name].items[i])list.data[name].items[i]={checked:false,count:""};
     const td=document.createElement("td");
-    td.className="center-cell";
+    const wrapper=document.createElement("div");
+    wrapper.className="cell-container";
 
     const cb=document.createElement("input");
     cb.type="checkbox";
@@ -347,6 +399,7 @@ function createRow(name,gen){
     num.type="number";
     num.min=0;
     num.value=list.data[name].items[i].count;
+    num.disabled=!cb.checked;
 
     cb.onchange=()=>{
       if(list.data[name].lock){cb.checked=list.data[name].items[i].checked;return;}
@@ -364,13 +417,16 @@ function createRow(name,gen){
       saveData();
     };
 
-    td.appendChild(cb);
-    td.appendChild(num);
+    wrapper.appendChild(cb);
+    wrapper.appendChild(num);
+    td.appendChild(wrapper);
     tr.appendChild(td);
   }
 
+  // 削除列
   const tdDel=document.createElement("td");
-  tdDel.className="delete-cell";
+  const delWrapper=document.createElement("div");
+  delWrapper.className="cell-container";
   const del=document.createElement("button");
   del.textContent="削除";
   del.onclick=()=>{
@@ -380,7 +436,8 @@ function createRow(name,gen){
     delete list.data[name];
     saveData();renderAll();
   };
-  tdDel.appendChild(del);
+  delWrapper.appendChild(del);
+  tdDel.appendChild(delWrapper);
   tr.appendChild(tdDel);
 
   return tr;
