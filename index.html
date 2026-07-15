@@ -6,12 +6,13 @@
 <style>
   body { font-family: sans-serif; padding: 20px; background-color: #fff; color: #333; }
 
-  /* コントロールパネル（タブの右、削除の上に配置） */
+  /* コントロールパネル（タブの右端に1つ戻る、下に各種操作ボタン） */
   .control-panel {
     margin-bottom: 20px;
   }
   .tab-line {
     display: flex;
+    justify-content: space-between; /* これで「1つ戻る」が綺麗に右端へ */
     align-items: center;
     gap: 15px;
     flex-wrap: wrap;
@@ -34,12 +35,13 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
+    white-space: nowrap;
   }
   #undoBtn:active {
     background-color: #ddd;
   }
 
-  /* テーブルのiPhone表示崩れ対策（横スクロール化） */
+  /* テーブルのiPhone表示崩れ・潰れ対策（横スクロール化） */
   .table-container {
     width: 100%;
     overflow-x: auto;
@@ -49,29 +51,50 @@
     border-radius: 4px;
   }
 
-  table { border-collapse: collapse; width: 100%; table-layout: fixed; }
-  th, td { border: 1px solid #ccc; padding: 6px; text-align: center; vertical-align: middle; }
-
-  /* 列幅の最適化（table-layout: fixed用） */
-  th, td { width: 75px; } /* 種類列のデフォルト幅 */
-  th:first-child, td:first-child { width: 55px; } /* ロック列 */
-  th:last-child, td:last-child { width: 65px; } /* 削除列 */
-
-  /* メンバー列は広め（吉田綾乃クリスティー対策） */
-  #memberHeader,
-  td.name-cell {
-    width: 150px;
-    white-space: nowrap;
-    text-align: left;
+  table { 
+    border-collapse: collapse; 
+    width: 100%; 
+    min-width: 670px; /* iPhoneで5種並んでも絶対に潰れない最小幅を確保 */
+    table-layout: fixed; 
+  }
+  th, td { 
+    border: 1px solid #ccc; 
+    padding: 8px 4px; 
+    text-align: center; 
+    vertical-align: middle; 
+    box-sizing: border-box;
   }
 
-  /* セル内のフレックスコンテナ（表示崩れ対策） */
-  .cell-container {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    width: 100%;
+  /* クラスによる正確な列幅管理（合計: 85 + 145 + (75*5) + 65 = 670px） */
+  .col-lock { width: 85px; }    /* ボタンが収まるよう少し広めに */
+  .col-member { width: 145px; }  /* 吉田綾乃クリスティー対策 */
+  .col-type { width: 75px; }    /* 各種類（ポーズ）列 */
+  .col-delete { width: 65px; }  /* 削除列 */
+
+  /* メンバー列の設定 */
+  td.name-cell {
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  /* 種類セルのスタイル（Safariのバグ対策でインライン横並びに見直し） */
+  td.type-cell {
+    white-space: nowrap;
+  }
+  td.type-cell input[type="checkbox"] {
+    vertical-align: middle;
+    margin: 0 4px 0 0;
+  }
+
+  /* 数字欄のコンパクト化（iPhone対応） */
+  input[type="number"] {
+    vertical-align: middle;
+    width: 36px;
+    background-color: rgba(255,255,255,0.85);
+    border: 1px solid #ccc;
+    padding: 2px;
+    border-radius: 4px;
+    font-size: 15px;
     box-sizing: border-box;
   }
 
@@ -80,24 +103,28 @@
     background-color: #7b4ca5;
     color: white;
     text-shadow: 0 0 3px black;
-    padding: 10px 6px;
+    padding: 8px 4px;
   }
 
   .header-cell {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
   }
 
-  /* 数字欄のコンパクト化（iPhone対応） */
-  input[type="number"] {
-    width: 36px;
-    background-color: rgba(255,255,255,0.85);
-    border: 1px solid #ccc;
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-size: 16px;
+  /* ヘッダー内のボタンが枠内に綺麗に収まるように微調整 */
+  .header-btn {
+    padding: 3px 4px;
+    font-size: 11px;
+    width: 100%;
+    max-width: 76px; /* col-lock(85px)の枠内に収まるサイズ */
+    white-space: nowrap;
+    box-sizing: border-box;
+    margin-top: 4px;
+  }
+  #favFilterBtn {
+    max-width: 110px; /* メンバー列のボタン用 */
   }
 
   .bg-3rd { background-color: #cceeff; }
@@ -112,7 +139,7 @@
   }
   .favorite.checked {
     color: gold;
-    text-shadow: -1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000;
+    text-shadow: -1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,-1px 1px 0 #000;
   }
 
   .tab {
@@ -135,13 +162,6 @@
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
-  }
-
-  .header-btn {
-    padding: 3px 6px;
-    font-size: 12px;
-    width: 110px;
-    white-space: nowrap;
   }
 
   #tableBody tr:nth-child(even) td:not(.name-cell) {
@@ -208,12 +228,12 @@ let lists=JSON.parse(localStorage.getItem("nogiLists"))||[
 ];
 let currentListIndex=0;
 
-// 複数回対応の履歴スタック（LocalStorage同期）
+// 複数回対応の履歴スタック
 let historyStack = JSON.parse(localStorage.getItem("nogiLists_history")) || [];
 
 function backupData(){
   historyStack.push(JSON.stringify(lists));
-  if(historyStack.length > 20) historyStack.shift(); // 最大20回まで保持
+  if(historyStack.length > 20) historyStack.shift(); // 直近20回まで巻き戻し可能
   localStorage.setItem("nogiLists_history", JSON.stringify(historyStack));
 }
 function saveData(){localStorage.setItem("nogiLists",JSON.stringify(lists));}
@@ -294,6 +314,7 @@ function renderHeader(){
   header.innerHTML="";
 
   const thLock=document.createElement("th");
+  thLock.className = "col-lock";
   thLock.innerHTML=`
     <div class="header-cell">
       ロック
@@ -302,6 +323,7 @@ function renderHeader(){
   header.appendChild(thLock);
 
   const thMember=document.createElement("th");
+  thMember.className = "col-member";
   thMember.id="memberHeader";
   thMember.innerHTML=`
     <div class="header-cell">
@@ -333,11 +355,13 @@ function renderHeader(){
 
   for(let i=0;i<list.typeCount;i++){
     const th=document.createElement("th");
+    th.className = "col-type";
     th.textContent=list.typeNames[i];
     header.appendChild(th);
   }
 
   const thDel=document.createElement("th");
+  thDel.className = "col-delete";
   thDel.textContent="削除";
   header.appendChild(thDel);
 }
@@ -354,8 +378,7 @@ function createRow(name,gen){
 
   // ロック列
   const tdLock=document.createElement("td");
-  const lockWrapper=document.createElement("div");
-  lockWrapper.className="cell-container";
+  tdLock.className = "col-lock";
   const lock=document.createElement("input");
   lock.type="checkbox";
   lock.checked=list.data[name].lock;
@@ -364,13 +387,12 @@ function createRow(name,gen){
     list.data[name].lock=lock.checked;
     saveData();renderTable();
   };
-  lockWrapper.appendChild(lock);
-  tdLock.appendChild(lockWrapper);
+  tdLock.appendChild(lock);
   tr.appendChild(tdLock);
 
   // メンバー名列
   const tdName=document.createElement("td");
-  tdName.className="name-cell "+genColor[gen];
+  tdName.className="col-member name-cell "+genColor[gen];
   const fav=document.createElement("span");
   fav.textContent="★";
   fav.className="favorite"+(list.data[name].favorite?" checked":"");
@@ -388,8 +410,7 @@ function createRow(name,gen){
   for(let i=0;i<list.typeCount;i++){
     if(!list.data[name].items[i])list.data[name].items[i]={checked:false,count:""};
     const td=document.createElement("td");
-    const wrapper=document.createElement("div");
-    wrapper.className="cell-container";
+    td.className = "col-type type-cell";
 
     const cb=document.createElement("input");
     cb.type="checkbox";
@@ -417,16 +438,14 @@ function createRow(name,gen){
       saveData();
     };
 
-    wrapper.appendChild(cb);
-    wrapper.appendChild(num);
-    td.appendChild(wrapper);
+    td.appendChild(cb);
+    td.appendChild(num);
     tr.appendChild(td);
   }
 
   // 削除列
   const tdDel=document.createElement("td");
-  const delWrapper=document.createElement("div");
-  delWrapper.className="cell-container";
+  tdDel.className = "col-delete";
   const del=document.createElement("button");
   del.textContent="削除";
   del.onclick=()=>{
@@ -436,8 +455,7 @@ function createRow(name,gen){
     delete list.data[name];
     saveData();renderAll();
   };
-  delWrapper.appendChild(del);
-  tdDel.appendChild(delWrapper);
+  tdDel.appendChild(del);
   tr.appendChild(tdDel);
 
   return tr;
