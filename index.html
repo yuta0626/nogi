@@ -41,7 +41,7 @@
     background-color: #ddd;
   }
 
-  /* テーブルのiPhone表示崩れ・潰れ対策 */
+  /* テーブルのスクロール用コンテナ */
   .table-container {
     width: 100%;
     overflow-x: auto;
@@ -51,7 +51,7 @@
     border-radius: 4px;
   }
 
-  /* 5種のときのデフォルト設定は一切変更していません */
+  /* 5種のときのデフォルト設定（ここを基準に3種・4種も連動させます） */
   table { 
     border-collapse: collapse; 
     width: 100%; 
@@ -66,7 +66,7 @@
     box-sizing: border-box;
   }
 
-  /* クラスによる正確な列幅管理 */
+  /* クラスによる正確な列幅管理（5種のときの黄金比率） */
   .col-lock { width: 85px; }
   .col-member { width: 145px; }
   .col-type { width: 75px; }
@@ -353,7 +353,7 @@ function renderHeader(){
     saveData();renderTable();
   };
 
-  // グレー枠を作らず、選択された種類数分だけループを回します
+  // 純粋に選ばれた種類数分だけヘッダーを作ります
   for(let i=0;i<list.typeCount;i++){
     const th=document.createElement("th");
     th.className = "col-type";
@@ -407,7 +407,7 @@ function createRow(name,gen){
   tdName.appendChild(document.createTextNode(name));
   tr.appendChild(tdName);
 
-  // 選択された種類数分だけ綺麗に列を生成
+  // 種類列
   for(let i=0;i<list.typeCount;i++){
     if(!list.data[name].items[i])list.data[name].items[i]={checked:false,count:""};
     const td=document.createElement("td");
@@ -463,7 +463,7 @@ function createRow(name,gen){
 }
 
 function renderTable(){
-  // 🛠️ 5種のときのCSS設定を壊さず、3種・4種のときだけ幅を動的にジャストサイズ化
+  // 🛠️ 【ここを大修正】3種・4種のときも5種と「完全に同じ拡大率」で連動させます
   const tableElem = document.querySelector("table");
   const list=lists[currentListIndex];
   if (tableElem) {
@@ -471,10 +471,12 @@ function renderTable(){
       tableElem.style.width = "100%";
       tableElem.style.minWidth = "670px";
     } else if (list.typeCount === 4) {
-      tableElem.style.width = "595px"; /* 85 + 145 + (75*4) + 65 */
+      // 5種のとき（670px）に対する4種分（595px）の比率で画面幅に合わせて引き伸ばす
+      tableElem.style.width = "calc(100% * 595 / 670)";
       tableElem.style.minWidth = "595px";
     } else if (list.typeCount === 3) {
-      tableElem.style.width = "520px"; /* 85 + 145 + (75*3) + 65 */
+      // 5種のとき（670px）に対する3種分（520px）の比率で画面幅に合わせて引き伸ばす
+      tableElem.style.width = "calc(100% * 520 / 670)";
       tableElem.style.minWidth = "520px";
     }
   }
