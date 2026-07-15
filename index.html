@@ -6,7 +6,13 @@
 <style>
   body { font-family: sans-serif; padding: 20px; }
   table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-  th, td { border: 1px solid #ccc; padding: 8px; }
+  th, td { border: 1px solid #ccc; padding: 6px; }
+
+  /* 列幅調整（ロック・削除以外は狭める） */
+  th:not(:first-child):not(:last-child),
+  td:not(:first-child):not(:last-child) {
+    width: 70px;
+  }
 
   /* 期別背景色 */
   .bg-3rd { background-color: #cceeff; }
@@ -72,6 +78,13 @@
     margin-left: 8px;
   }
 
+  /* 一括ロックボタン */
+  .bulk-lock-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+    margin-left: 8px;
+  }
+
   /* 隔行色（メンバー列以外） */
   #tableBody tr:nth-child(even) td:not(.name-cell) {
     background-color: rgba(0, 0, 0, 0.05);
@@ -83,6 +96,12 @@
     border: 1px solid #ccc;
     padding: 2px 4px;
     border-radius: 4px;
+    font-size: 16px; /* ← メンバー名と同じ文字サイズ */
+  }
+
+  /* 削除ボタン中央寄せ */
+  td.delete-cell {
+    text-align: center;
   }
 </style>
 </head>
@@ -122,7 +141,10 @@
 <table id="goodsTable">
   <thead>
     <tr id="headerRow">
-      <th>ロック</th>
+      <th>
+        ロック
+        <button id="bulkLockBtn" class="bulk-lock-btn"></button>
+      </th>
       <th id="memberHeader">
         メンバー
         <button id="favFilterBtn" class="fav-filter-btn"></button>
@@ -271,7 +293,10 @@ document.querySelectorAll("input[name='typeCount']").forEach(radio => {
 function renderHeader() {
   const header = document.getElementById("headerRow");
   header.innerHTML = `
-    <th>ロック</th>
+    <th>
+      ロック
+      <button id="bulkLockBtn" class="bulk-lock-btn"></button>
+    </th>
     <th id="memberHeader">
       メンバー
       <button id="favFilterBtn" class="fav-filter-btn"></button>
@@ -279,6 +304,23 @@ function renderHeader() {
   `;
 
   const list = lists[currentListIndex];
+
+  // 一括ロックボタン
+  const bulkBtn = document.getElementById("bulkLockBtn");
+  const allLocked = Object.values(list.data).every(d => d.lock);
+  bulkBtn.textContent = allLocked ? "全て解除" : "全てロック";
+
+  bulkBtn.addEventListener("click", () => {
+    backupData();
+    const newState = !allLocked;
+    Object.keys(list.data).forEach(name => {
+      list.data[name].lock = newState;
+    });
+    saveData();
+    renderTable();
+  });
+
+  // お気に入りフィルター
   const favBtn = document.getElementById("favFilterBtn");
   favBtn.textContent = list.favFilter ? "全員表示" : "★お気に入りのみ";
   favBtn.addEventListener("click", () => {
@@ -288,6 +330,7 @@ function renderHeader() {
     renderTable();
   });
 
+  // 種類列
   for (let i = 0; i < list.typeCount; i++) {
     const th = document.createElement("th");
     th.textContent = list.typeNames[i];
@@ -324,7 +367,7 @@ function createRow(name, gen) {
   lockTd.appendChild(lockCheck);
   tr.appendChild(lockTd);
 
-  // 名前欄（メンバー列）
+  // 名前欄
   const fav = document.createElement("span");
   fav.textContent = "★";
   fav.className = "favorite" + (list.data[name].favorite ? " checked" : "");
@@ -392,6 +435,7 @@ function createRow(name, gen) {
 
   // 削除欄
   const delTd = document.createElement("td");
+  delTd.className = "delete-cell";
   const delBtn = document.createElement("button");
   delBtn.textContent = "削除";
   delBtn.addEventListener("click", () => {
