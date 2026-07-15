@@ -53,10 +53,11 @@
 
   table { 
     border-collapse: collapse; 
-    width: 100%; 
-    min-width: 670px; /* iPhoneで5種並んでも絶対に潰れない最小幅を確保 */
+    width: max-content; /* 👈 ここを変更：列幅の合計にピタッと合わせる */
     table-layout: fixed; 
   }
+  
+
   th, td { 
     border: 1px solid #ccc; 
     padding: 8px 4px; 
