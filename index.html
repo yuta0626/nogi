@@ -8,10 +8,18 @@
   table { border-collapse: collapse; width: 100%; margin-top: 20px; }
   th, td { border: 1px solid #ccc; padding: 6px; }
 
-  /* 列幅調整（ロック・削除以外は狭める） */
+  /* 列幅調整 */
+  /* ロック列（1列目）と削除列（最後の列）は元の幅のまま */
+  /* その他の列はコンパクトに */
   th:not(:first-child):not(:last-child),
   td:not(:first-child):not(:last-child) {
-    width: 70px;
+    width: 65px;   /* ← コンパクト幅 */
+  }
+
+  /* メンバー列は少し広めに */
+  #memberHeader,
+  td.name-cell {
+    width: 140px;
   }
 
   /* 期別背景色 */
@@ -97,6 +105,7 @@
     padding: 2px 4px;
     border-radius: 4px;
     font-size: 16px; /* ← メンバー名と同じ文字サイズ */
+    width: 55px;     /* ← コンパクト幅 */
   }
 
   /* 削除ボタン中央寄せ */
@@ -400,7 +409,6 @@ function createRow(name, gen) {
     const number = document.createElement("input");
     number.type = "number";
     number.min = 0;
-    number.style.width = "50px";
     number.value = list.data[name].items[i].count;
 
     checkbox.addEventListener("change", () => {
