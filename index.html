@@ -8,18 +8,30 @@
   table { border-collapse: collapse; width: 100%; margin-top: 20px; }
   th, td { border: 1px solid #ccc; padding: 6px; }
 
-  /* 列幅調整 */
-  /* ロック列（1列目）と削除列（最後の列）は元の幅のまま */
-  /* その他の列はコンパクトに */
-  th:not(:first-child):not(:last-child),
-  td:not(:first-child):not(:last-child) {
-    width: 65px;   /* ← コンパクト幅 */
+  /* 列幅最適化（全列コンパクト化） */
+  th, td {
+    width: 70px; /* 基本コンパクト幅 */
   }
 
-  /* メンバー列は少し広めに */
+  /* メンバー列は少し広め */
   #memberHeader,
   td.name-cell {
-    width: 140px;
+    width: 150px;
+  }
+
+  /* 数字入力欄はさらにコンパクト */
+  input[type="number"] {
+    width: 55px;
+    background-color: rgba(255, 255, 255, 0.85);
+    border: 1px solid #ccc;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+
+  /* 削除ボタン中央寄せ */
+  td.delete-cell {
+    text-align: center;
   }
 
   /* 期別背景色 */
@@ -96,21 +108,6 @@
   /* 隔行色（メンバー列以外） */
   #tableBody tr:nth-child(even) td:not(.name-cell) {
     background-color: rgba(0, 0, 0, 0.05);
-  }
-
-  /* 数字入力欄の背景を統一して浮かないようにする */
-  input[type="number"] {
-    background-color: rgba(255, 255, 255, 0.85);
-    border: 1px solid #ccc;
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-size: 16px; /* ← メンバー名と同じ文字サイズ */
-    width: 55px;     /* ← コンパクト幅 */
-  }
-
-  /* 削除ボタン中央寄せ */
-  td.delete-cell {
-    text-align: center;
   }
 </style>
 </head>
