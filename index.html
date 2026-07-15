@@ -270,7 +270,7 @@ document.getElementById("addListBtn").addEventListener("click", () => {
   renderAll();
 });
 
-// 種類名入力欄
+// 種類名入力欄の続き（前半からの続き）
 function renderTypeNameInputs() {
   const box = document.getElementById("typeNameInputs");
   box.innerHTML = "";
@@ -310,7 +310,7 @@ document.querySelectorAll("input[name='typeCount']").forEach(radio => {
   });
 });
 
-// ヘッダー
+// ヘッダー描画
 function renderHeader() {
   const header = document.getElementById("headerRow");
   header.innerHTML = `
@@ -345,10 +345,10 @@ function renderHeader() {
     renderTable();
   });
 
-  // お気に入りフィルター（3モードループ）
+  // 表示モード（3段階ループ）
   const favBtn = document.getElementById("favFilterBtn");
-
   const mode = list.favFilterMode;
+
   favBtn.textContent =
     mode === 0 ? "全メンバー" :
     mode === 1 ? "お気に入り" :
@@ -361,7 +361,7 @@ function renderHeader() {
     renderTable();
   });
 
-  // 種類列
+  // 種類列ヘッダー
   for (let i = 0; i < list.typeCount; i++) {
     const th = document.createElement("th");
     th.textContent = list.typeNames[i];
@@ -493,4 +493,32 @@ function renderTable() {
 
   const list = lists[currentListIndex];
 
-  Object.keys(list.members).for
+  Object.keys(list.members).forEach(gen => {
+    list.members[gen].forEach(name => {
+      const row = createRow(name, Number(gen));
+      if (row) body.appendChild(row);
+    });
+  });
+}
+
+// 全描画
+function renderAll() {
+  renderTabs();
+
+  document.getElementById("editTabName").value = lists[currentListIndex].name;
+
+  const list = lists[currentListIndex];
+  document.querySelectorAll("input[name='typeCount']").forEach(radio => {
+    radio.checked = Number(radio.value) === list.typeCount;
+  });
+
+  renderTypeNameInputs();
+  renderTable();
+}
+
+// 初期描画
+renderAll();
+</script>
+
+</body>
+</html>
