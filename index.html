@@ -413,9 +413,13 @@ for (let i = 0; i < list.typeCount; i++) {
 
   const td = document.createElement("td");
   td.className = "col-type type-cell";
-  td.style.display = "flex";
-  td.style.alignItems = "center";   // ★ メンバー名と同じ高さに揃える
-  td.style.justifyContent = "center";
+
+  // ★ 横並びにするためのコンテナ
+  const rowBox = document.createElement("div");
+  rowBox.style.display = "flex";
+  rowBox.style.flexDirection = "row";
+  rowBox.style.alignItems = "center";   // メンバー名と同じ高さに揃える
+  rowBox.style.justifyContent = "center";
 
   // チェックボックス
   const cb = document.createElement("input");
@@ -431,7 +435,7 @@ for (let i = 0; i < list.typeCount; i++) {
   num.disabled = !cb.checked;
   num.style.marginRight = "6px";
 
-  // ▼ 右側の縦並びボタンコンテナ
+  // ★ 右側の縦並びボタンコンテナ
   const btnBox = document.createElement("div");
   btnBox.style.display = "flex";
   btnBox.style.flexDirection = "column";
@@ -506,11 +510,14 @@ for (let i = 0; i < list.typeCount; i++) {
   btnBox.appendChild(btnPlus);
   btnBox.appendChild(btnMinus);
 
-  td.appendChild(cb);
-  td.appendChild(num);
-  td.appendChild(btnBox);
+  rowBox.appendChild(cb);
+  rowBox.appendChild(num);
+  rowBox.appendChild(btnBox);
+
+  td.appendChild(rowBox);
   tr.appendChild(td);
 }
+
 
 
 
