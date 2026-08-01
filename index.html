@@ -413,11 +413,15 @@ for (let i = 0; i < list.typeCount; i++) {
 
   const td = document.createElement("td");
   td.className = "col-type type-cell";
+  td.style.display = "flex";
+  td.style.alignItems = "center";   // ★ メンバー名と同じ高さに揃える
+  td.style.justifyContent = "center";
 
   // チェックボックス
   const cb = document.createElement("input");
   cb.type = "checkbox";
   cb.checked = list.data[name].items[i].checked;
+  cb.style.marginRight = "6px";
 
   // 数字入力欄
   const num = document.createElement("input");
@@ -425,12 +429,13 @@ for (let i = 0; i < list.typeCount; i++) {
   num.min = 0;
   num.value = list.data[name].items[i].count;
   num.disabled = !cb.checked;
+  num.style.marginRight = "6px";
 
-  // ▼ 追加：縦並びのボタンコンテナ（右側）
+  // ▼ 右側の縦並びボタンコンテナ
   const btnBox = document.createElement("div");
-  btnBox.style.display = "inline-flex";
+  btnBox.style.display = "flex";
   btnBox.style.flexDirection = "column";
-  btnBox.style.marginLeft = "6px";
+  btnBox.style.marginLeft = "4px";
 
   // ＋ボタン（上）
   const btnPlus = document.createElement("button");
@@ -486,7 +491,7 @@ for (let i = 0; i < list.typeCount; i++) {
     saveData();
   };
 
-  // 数字入力欄の動作（直接入力）
+  // 数字入力欄の動作
   num.oninput = () => {
     if (list.data[name].lock) {
       num.value = list.data[name].items[i].count;
@@ -498,14 +503,15 @@ for (let i = 0; i < list.typeCount; i++) {
   };
 
   // DOM 追加
-  btnBox.appendChild(btnPlus);   // 上に＋
-  btnBox.appendChild(btnMinus);  // 下に−
+  btnBox.appendChild(btnPlus);
+  btnBox.appendChild(btnMinus);
 
   td.appendChild(cb);
   td.appendChild(num);
   td.appendChild(btnBox);
   tr.appendChild(td);
 }
+
 
 
 
