@@ -426,35 +426,22 @@ for (let i = 0; i < list.typeCount; i++) {
   num.value = list.data[name].items[i].count;
   num.disabled = !cb.checked;
 
-  // ▼ 追加：縦並びのボタンコンテナ
+  // ▼ 追加：縦並びのボタンコンテナ（右側）
   const btnBox = document.createElement("div");
   btnBox.style.display = "inline-flex";
   btnBox.style.flexDirection = "column";
   btnBox.style.marginLeft = "6px";
 
-  // −ボタン
-  const btnMinus = document.createElement("button");
-  btnMinus.textContent = "−";
-  btnMinus.style.padding = "2px 4px";
-  btnMinus.style.marginBottom = "2px";
-
-  // ＋ボタン
+  // ＋ボタン（上）
   const btnPlus = document.createElement("button");
   btnPlus.textContent = "＋";
   btnPlus.style.padding = "2px 4px";
+  btnPlus.style.marginBottom = "2px";
 
-  // −ボタンの動作
-  btnMinus.onclick = () => {
-    if (list.data[name].lock) return;
-    if (!cb.checked) return;
-
-    backupData();
-    const current = Number(num.value || 0);
-    const next = Math.max(0, current - 1);
-    num.value = next;
-    list.data[name].items[i].count = next;
-    saveData();
-  };
+  // −ボタン（下）
+  const btnMinus = document.createElement("button");
+  btnMinus.textContent = "−";
+  btnMinus.style.padding = "2px 4px";
 
   // ＋ボタンの動作
   btnPlus.onclick = () => {
@@ -464,6 +451,19 @@ for (let i = 0; i < list.typeCount; i++) {
     backupData();
     const current = Number(num.value || 0);
     const next = current + 1;
+    num.value = next;
+    list.data[name].items[i].count = next;
+    saveData();
+  };
+
+  // −ボタンの動作
+  btnMinus.onclick = () => {
+    if (list.data[name].lock) return;
+    if (!cb.checked) return;
+
+    backupData();
+    const current = Number(num.value || 0);
+    const next = Math.max(0, current - 1);
     num.value = next;
     list.data[name].items[i].count = next;
     saveData();
@@ -486,7 +486,7 @@ for (let i = 0; i < list.typeCount; i++) {
     saveData();
   };
 
-  // 数字入力欄の動作（直接入力した場合）
+  // 数字入力欄の動作（直接入力）
   num.oninput = () => {
     if (list.data[name].lock) {
       num.value = list.data[name].items[i].count;
@@ -498,14 +498,15 @@ for (let i = 0; i < list.typeCount; i++) {
   };
 
   // DOM 追加
-  btnBox.appendChild(btnMinus);
-  btnBox.appendChild(btnPlus);
+  btnBox.appendChild(btnPlus);   // 上に＋
+  btnBox.appendChild(btnMinus);  // 下に−
 
   td.appendChild(cb);
   td.appendChild(num);
   td.appendChild(btnBox);
   tr.appendChild(td);
 }
+
 
 
   // 削除列
