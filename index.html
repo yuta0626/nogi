@@ -426,15 +426,22 @@ for (let i = 0; i < list.typeCount; i++) {
   num.value = list.data[name].items[i].count;
   num.disabled = !cb.checked;
 
-  // ▼ 追加：−ボタン
+  // ▼ 追加：縦並びのボタンコンテナ
+  const btnBox = document.createElement("div");
+  btnBox.style.display = "inline-flex";
+  btnBox.style.flexDirection = "column";
+  btnBox.style.marginLeft = "6px";
+
+  // −ボタン
   const btnMinus = document.createElement("button");
   btnMinus.textContent = "−";
-  btnMinus.style.marginRight = "4px";
+  btnMinus.style.padding = "2px 4px";
+  btnMinus.style.marginBottom = "2px";
 
-  // ▼ 追加：＋ボタン
+  // ＋ボタン
   const btnPlus = document.createElement("button");
   btnPlus.textContent = "＋";
-  btnPlus.style.marginLeft = "4px";
+  btnPlus.style.padding = "2px 4px";
 
   // −ボタンの動作
   btnMinus.onclick = () => {
@@ -491,10 +498,12 @@ for (let i = 0; i < list.typeCount; i++) {
   };
 
   // DOM 追加
+  btnBox.appendChild(btnMinus);
+  btnBox.appendChild(btnPlus);
+
   td.appendChild(cb);
-  td.appendChild(btnMinus);
   td.appendChild(num);
-  td.appendChild(btnPlus);
+  td.appendChild(btnBox);
   tr.appendChild(td);
 }
 
