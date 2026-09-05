@@ -757,21 +757,18 @@ saveData();
 // 数字入力欄の動作
 
 num.oninput = () => {
+    if (list.data[name].lock) {
+        num.value = list.data[name].items[i].count;
+        return;
+    }
 
-if (list.data[name].lock) {
+    backupData();
+    list.data[name].items[i].count = num.value;
+    saveData();
 
-num.value = list.data[name].items[i].count;
-
-return;
-
-}
-
-backupData();
-
-list.data[name].items[i].count = num.value;
-
-saveData();
-
+    // ★ 追加：総数表示を更新
+    const total = calcTotalForList(list);
+    document.getElementById("totalArea").textContent = `総数： ${total}`;
 };
 
 // DOM 追加
