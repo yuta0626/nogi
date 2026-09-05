@@ -877,11 +877,16 @@ if(row)body.appendChild(row);
 /* ★ タブ全体の総数を計算する関数（追加済み） */
 function calcTotalForList(list) {
     let total = 0;
+    const mode = list.favFilterMode;  // ★ フィルタモード取得
 
     Object.keys(list.members).forEach(gen => {
         list.members[gen].forEach(name => {
             const d = list.data[name];
             if (!d || !d.items) return;
+
+            // ★ フィルタ判定
+            if (mode === 1 && !d.favorite) return;  // お気に入りのみ
+            if (mode === 2 && d.favorite) return;   // お気に入り以外
 
             for (let i = 0; i < list.typeCount; i++) {
                 const item = d.items[i];
@@ -896,7 +901,6 @@ function calcTotalForList(list) {
     });
 
     return total;
-}
 
 function renderAll(){
 
