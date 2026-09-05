@@ -685,50 +685,42 @@ btnMinus.style.padding = "2px 4px";
 // ＋ボタンの動作
 
 btnPlus.onclick = () => {
+    if (list.data[name].lock) return;
+    if (!cb.checked) return;
 
-if (list.data[name].lock) return;
+    backupData();
 
-if (!cb.checked) return;
+    // ★ 空欄は 1 として扱う
+    const current = num.value === "" ? 1 : Number(num.value);
+    const next = current + 1;
 
-backupData();
-
-const current = Number(num.value || 0);
-
-const next = current + 1;
-if (next === 1) {
-    num.value = "";
-    list.data[name].items[i].count = "";
-} else {
     num.value = next;
     list.data[name].items[i].count = next;
-}
 
-saveData();
-
+    saveData();
 };
 
 // −ボタンの動作
 
 btnMinus.onclick = () => {
+    if (list.data[name].lock) return;
+    if (!cb.checked) return;
 
-if (list.data[name].lock) return;
+    backupData();
 
-if (!cb.checked) return;
+    const current = num.value === "" ? 1 : Number(num.value);
+    const next = Math.max(1, current - 1);
 
-backupData();
+    // ★ 1 のときは空欄に戻す
+    if (next === 1) {
+        num.value = "";
+        list.data[name].items[i].count = "";
+    } else {
+        num.value = next;
+        list.data[name].items[i].count = next;
+    }
 
-const current = Number(num.value || 0);
-
-const next = Math.max(0, current - 1);
-if (next === 1) {
-    num.value = "";
-    list.data[name].items[i].count = "";
-} else {
-    num.value = next;
-    list.data[name].items[i].count = next;
-}
-
-saveData();
+    saveData();
 
 };
 
