@@ -2,153 +2,106 @@
 <html lang="ja">
 
 <head>
-
 <meta charset="UTF-8">
-
 <title>生写真管理</title>
 
 <style>
-
 body { font-family: sans-serif; padding: 20px; background-color: #fff; color: #333; }
 
-/* コントロールパネル（タブの右端に1つ戻る、下に各種操作ボタン） */
-
-.control-panel {
-margin-bottom: 20px;
-}
-
+/* コントロールパネル */
+.control-panel { margin-bottom: 20px; }
 .tab-line {
-display: flex;
-justify-content: space-between;
-align-items: center;
-gap: 15px;
-flex-wrap: wrap;
-margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
 }
-
-.tab-area {
-display: flex;
-flex-wrap: wrap;
-gap: 5px;
-}
-
-.action-line {
-display: flex;
-gap: 8px;
-}
+.tab-area { display: flex; flex-wrap: wrap; gap: 5px; }
+.action-line { display: flex; gap: 8px; }
 
 #undoBtn {
-padding: 6px 12px;
-cursor: pointer;
-background-color: #f0f0f0;
-border: 1px solid #ccc;
-border-radius: 4px;
-font-size: 14px;
-white-space: nowrap;
+    padding: 6px 12px;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    white-space: nowrap;
 }
+#undoBtn:active { background-color: #ddd; }
 
-#undoBtn:active {
-background-color: #ddd;
-}
-
-/* テーブルのスクロール用コンテナ */
-
+/* テーブル */
 .table-container {
-width: 100%;
-overflow-x: auto;
--webkit-overflow-scrolling: touch;
-margin-top: 20px;
-border: 1px solid #ccc;
-border-radius: 4px;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
-
-/* 5種のときのデフォルト設定（ここを基準に3種・4種も連動させます） */
 
 table {
-border-collapse: collapse;
-width: 100%;
-min-width: 670px;
-table-layout: fixed;
-margin: 0 auto; /* 💡 表をページ中央に寄せる設定を追加 */
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 670px;
+    table-layout: fixed;
+    margin: 0 auto;
 }
 
 th, td {
-border: 1px solid #ccc;
-padding: 8px 4px;
-text-align: center;
-vertical-align: middle;
-box-sizing: border-box;
+    border: 1px solid #ccc;
+    padding: 8px 4px;
+    text-align: center;
+    vertical-align: middle;
+    box-sizing: border-box;
 }
-
-/* クラスによる正確な列幅管理（5種のときの黄金比率） */
 
 .col-lock { width: 85px; }
 .col-member { width: 145px; }
 .col-type { width: 75px; }
 .col-delete { width: 65px; }
 
-/* メンバー列の設定 */
-
-td.name-cell {
-text-align: left;
-white-space: nowrap;
-}
-
-/* 種類セルのスタイル */
-
-td.type-cell {
-white-space: nowrap;
-}
-
-td.type-cell input[type="checkbox"] {
-vertical-align: middle;
-margin: 0 4px 0 0;
-}
-
-/* 数字欄のコンパクト化（iPhone対応） */
+td.name-cell { text-align: left; white-space: nowrap; }
+td.type-cell { white-space: nowrap; }
 
 input[type="number"] {
-vertical-align: middle;
-width: 36px;
-background-color: rgba(255,255,255,0.85);
-border: 1px solid #ccc;
-padding: 2px;
-border-radius: 4px;
-font-size: 15px;
-box-sizing: border-box;
+    vertical-align: middle;
+    width: 36px;
+    background-color: rgba(255,255,255,0.85);
+    border: 1px solid #ccc;
+    padding: 2px;
+    border-radius: 4px;
+    font-size: 15px;
+    box-sizing: border-box;
 }
 
-/* 乃木坂カラーのヘッダー */
-
 thead th {
-background-color: #7b4ca5;
-color: white;
-text-shadow: 0 0 3px black;
-padding: 8px 4px;
+    background-color: #7b4ca5;
+    color: white;
+    text-shadow: 0 0 3px black;
+    padding: 8px 4px;
 }
 
 .header-cell {
-display: flex;
-flex-direction: column;
-align-items: center;
-gap: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
 }
-
-/* ヘッダー内のボタンが枠内に綺麗に収まるように微調整 */
 
 .header-btn {
-padding: 3px 4px;
-font-size: 11px;
-width: 100%;
-max-width: 76px;
-white-space: nowrap;
-box-sizing: border-box;
-margin-top: 4px;
+    padding: 3px 4px;
+    font-size: 11px;
+    width: 100%;
+    max-width: 76px;
+    white-space: nowrap;
+    box-sizing: border-box;
+    margin-top: 4px;
 }
 
-#favFilterBtn {
-max-width: 110px;
-}
+#favFilterBtn { max-width: 110px; }
 
 .bg-3rd { background-color: #cceeff; }
 .bg-4th { background-color: #ffddaa; }
@@ -156,45 +109,37 @@ max-width: 110px;
 .bg-6th { background-color: #ccf5cc; }
 
 .favorite {
-cursor: pointer;
-font-size: 16px;
-margin-right: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 6px;
 }
-
 .favorite.checked {
-color: gold;
-text-shadow: -1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,-1px 1px 0 #000;
+    color: gold;
+    text-shadow: -1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,-1px 1px 0 #000;
 }
 
 .tab {
-display: inline-block;
-padding: 8px 12px;
-border: 1px solid #aaa;
-background: #eee;
-cursor: pointer;
+    display: inline-block;
+    padding: 8px 12px;
+    border: 1px solid #aaa;
+    background: #eee;
+    cursor: pointer;
 }
-
 .tab.active { background: #ddd; font-weight: bold; }
 
 .setting-box {
-margin-bottom: 20px;
-padding: 10px;
-border: 1px solid #aaa;
-background: #f9f9f9;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #aaa;
+    background: #f9f9f9;
 }
 
-.flex-row {
-display: flex;
-gap: 20px;
-flex-wrap: wrap;
-}
+.flex-row { display: flex; gap: 20px; flex-wrap: wrap; }
 
 #tableBody tr:nth-child(even) td:not(.name-cell) {
-background-color: rgba(0,0,0,0.05);
+    background-color: rgba(0,0,0,0.05);
 }
-
 </style>
-
 </head>
 
 <body>
@@ -202,688 +147,425 @@ background-color: rgba(0,0,0,0.05);
 <h2>生写真管理</h2>
 
 <div class="control-panel">
+    <div class="tab-line">
+        <div class="tab-area" id="tabArea"></div>
+        <button id="undoBtn">⟲ 1つ戻る</button>
+    </div>
 
-<div class="tab-line">
-
-<div class="tab-area" id="tabArea"></div>
-
-<button id="undoBtn">⟲ 1つ戻る</button>
-
+    <div class="action-line">
+        <button id="addListBtn">＋ 新規リスト</button>
+        <button id="deleteTabBtn">タブ削除</button>
+    </div>
 </div>
 
-<div class="action-line">
-
-<button id="addListBtn">＋ 新規リスト</button>
-
-<button id="deleteTabBtn">タブ削除</button>
-
-</div>
-
-</div>
-
-<!-- ★ 追加：タブごとの総数表示エリア -->
+<!-- ★ タブごとの総数 / 全タブ総数 -->
 <div id="totalArea" style="margin: 10px 0; font-size: 16px; font-weight: bold;"></div>
 
 <div class="setting-box">
-
-<h3>タブ名編集</h3>
-
-<input type="text" id="editTabName">
-
-<button id="saveTabNameBtn">変更</button>
-
+    <h3>タブ名編集</h3>
+    <input type="text" id="editTabName">
+    <button id="saveTabNameBtn">変更</button>
 </div>
 
 <div class="setting-box flex-row">
+    <div>
+        <h3>種類</h3>
+        <label><input type="radio" name="typeCount" value="3">3種</label><br>
+        <label><input type="radio" name="typeCount" value="4">4種</label><br>
+        <label><input type="radio" name="typeCount" value="5">5種</label>
+    </div>
 
-<div>
-
-<h3>種類</h3>
-
-<label><input type="radio" name="typeCount" value="3">3種</label><br>
-
-<label><input type="radio" name="typeCount" value="4">4種</label><br>
-
-<label><input type="radio" name="typeCount" value="5">5種</label>
-
-</div>
-
-<div>
-
-<h3>種類名</h3>
-
-<div id="typeNameInputs"></div>
-
-</div>
-
+    <div>
+        <h3>種類名</h3>
+        <div id="typeNameInputs"></div>
+    </div>
 </div>
 
 <div class="table-container">
-
 <table>
-
 <thead>
-
 <tr id="headerRow"></tr>
-
 </thead>
-
 <tbody id="tableBody"></tbody>
-
 </table>
-
 </div>
 
 <script>
 
 const defaultMembers={
-
 3:["伊藤理々杏","岩本蓮加","吉田綾乃クリスティー"],
-
 4:["遠藤さくら","賀喜遥香","金川紗耶","黒見明香","柴田柚菜","田村真佑","筒井あやめ","林瑠奈","弓木奈於"],
-
 5:["五百城茉央","池田瑛紗","一ノ瀬美空","井上和","岡本姫奈","小川彩","奥田いろは","川﨑桜","菅原咲月","冨里奈央","中西アルノ"],
-
 6:["愛宕心響","大越ひなの","小津玲奈","海邉朱莉","川端晃菜","鈴木佑捺","瀬戸口心月","長嶋凛桜","増田三莉音","森平麗心","矢田萌華"]
-
 };
 
 const genColor={3:"bg-3rd",4:"bg-4th",5:"bg-5th",6:"bg-6th"};
 
 let lists=JSON.parse(localStorage.getItem("nogiLists"))||[
-
 {name:"通常",typeCount:3,typeNames:["A","B","C"],members:JSON.parse(JSON.stringify(defaultMembers)),data:{},favFilterMode:0}
-
 ];
 
 let currentListIndex=0;
-
 let historyStack = JSON.parse(localStorage.getItem("nogiLists_history")) || [];
 
 function backupData(){
-
-historyStack.push(JSON.stringify(lists));
-
-if(historyStack.length > 20) historyStack.shift();
-
-localStorage.setItem("nogiLists_history", JSON.stringify(historyStack));
-
+    historyStack.push(JSON.stringify(lists));
+    if(historyStack.length > 20) historyStack.shift();
+    localStorage.setItem("nogiLists_history", JSON.stringify(historyStack));
 }
 
-function saveData(){localStorage.setItem("nogiLists",JSON.stringify(lists));}
+function saveData(){ localStorage.setItem("nogiLists",JSON.stringify(lists)); }
 
 document.getElementById("undoBtn").onclick=()=>{
-
-if(historyStack.length > 0){
-
-const b = historyStack.pop();
-
-lists = JSON.parse(b);
-
-saveData();
-
-localStorage.setItem("nogiLists_history", JSON.stringify(historyStack));
-
-renderAll();
-
-}
-
+    if(historyStack.length > 0){
+        const b = historyStack.pop();
+        lists = JSON.parse(b);
+        saveData();
+        localStorage.setItem("nogiLists_history", JSON.stringify(historyStack));
+        renderAll();
+    }
 };
 
 function renderTabs(){
-
-const area=document.getElementById("tabArea");
-
-area.innerHTML="";
-
-lists.forEach((list,i)=>{
-
-const tab=document.createElement("div");
-
-tab.className="tab"+(i===currentListIndex?" active":"");
-
-tab.textContent=list.name;
-
-tab.onclick=()=>{currentListIndex=i;renderAll();};
-
-area.appendChild(tab);
-
-});
-
+    const area=document.getElementById("tabArea");
+    area.innerHTML="";
+    lists.forEach((list,i)=>{
+        const tab=document.createElement("div");
+        tab.className="tab"+(i===currentListIndex?" active":"");
+        tab.textContent=list.name;
+        tab.onclick=()=>{currentListIndex=i;renderAll();};
+        area.appendChild(tab);
+    });
 }
 
 document.getElementById("saveTabNameBtn").onclick=()=>{
-
-backupData();
-
-lists[currentListIndex].name=document.getElementById("editTabName").value;
-
-saveData();renderAll();
-
+    backupData();
+    lists[currentListIndex].name=document.getElementById("editTabName").value;
+    saveData();renderAll();
 };
 
 document.getElementById("deleteTabBtn").onclick=()=>{
-
-if(lists.length<=1)return;
-
-backupData();
-
-lists.splice(currentListIndex,1);
-
-currentListIndex=Math.max(0,currentListIndex-1);
-
-saveData();renderAll();
-
+    if(lists.length<=1)return;
+    backupData();
+    lists.splice(currentListIndex,1);
+    currentListIndex=Math.max(0,currentListIndex-1);
+    saveData();renderAll();
 };
 
 document.getElementById("addListBtn").onclick=()=>{
-
-backupData();
-
-lists.push({name:"新規リスト",typeCount:3,typeNames:["A","B","C"],members:JSON.parse(JSON.stringify(defaultMembers)),data:{},favFilterMode:0});
-
-currentListIndex=lists.length-1;
-
-saveData();renderAll();
-
+    backupData();
+    lists.push({name:"新規リスト",typeCount:3,typeNames:["A","B","C"],members:JSON.parse(JSON.stringify(defaultMembers)),data:{},favFilterMode:0});
+    currentListIndex=lists.length-1;
+    saveData();renderAll();
 };
 
 function renderTypeNameInputs(){
+    const box=document.getElementById("typeNameInputs");
+    box.innerHTML="";
+    const list=lists[currentListIndex];
 
-const box=document.getElementById("typeNameInputs");
+    for(let i=0;i<list.typeCount;i++){
+        const div=document.createElement("div");
+        div.innerHTML=`${i+1}種名：<input type="text" value="${list.typeNames[i]}" data-i="${i}">`;
+        box.appendChild(div);
+    }
 
-box.innerHTML="";
-
-const list=lists[currentListIndex];
-
-for(let i=0;i<list.typeCount;i++){
-
-const div=document.createElement("div");
-
-div.innerHTML=`${i+1}種名：<input type="text" value="${list.typeNames[i]}" data-i="${i}">`;
-
-box.appendChild(div);
-
-}
-
-box.querySelectorAll("input").forEach(inp=>{
-
-inp.oninput=()=>{
-
-backupData();
-
-lists[currentListIndex].typeNames[inp.dataset.i]=inp.value;
-
-saveData();renderTable();
-
-};
-
-});
-
+    box.querySelectorAll("input").forEach(inp=>{
+        inp.oninput=()=>{
+            backupData();
+            lists[currentListIndex].typeNames[inp.dataset.i]=inp.value;
+            saveData();renderTable();
+        };
+    });
 }
 
 document.querySelectorAll("input[name='typeCount']").forEach(r=>{
-
-r.onchange=()=>{
-
-backupData();
-
-const list=lists[currentListIndex];
-
-list.typeCount=Number(r.value);
-
-while(list.typeNames.length<list.typeCount)list.typeNames.push("新種");
-
-saveData();renderAll();
-
-};
-
+    r.onchange=()=>{
+        backupData();
+        const list=lists[currentListIndex];
+        list.typeCount=Number(r.value);
+        while(list.typeNames.length<list.typeCount)list.typeNames.push("新種");
+        saveData();renderAll();
+    };
 });
 
 function renderHeader(){
+    const header=document.getElementById("headerRow");
+    header.innerHTML="";
 
-const header=document.getElementById("headerRow");
+    const thLock=document.createElement("th");
+    thLock.className = "col-lock";
+    thLock.innerHTML=`
+    <div class="header-cell">
+        ロック
+        <button id="bulkLockBtn" class="header-btn"></button>
+    </div>`;
+    header.appendChild(thLock);
 
-header.innerHTML="";
+    const thMember=document.createElement("th");
+    thMember.className = "col-member";
+    thMember.id="memberHeader";
+    thMember.innerHTML=`
+    <div class="header-cell">
+        メンバー
+        <button id="favFilterBtn" class="header-btn"></button>
+    </div>`;
+    header.appendChild(thMember);
 
-const thLock=document.createElement("th");
+    const list=lists[currentListIndex];
 
-thLock.className = "col-lock";
+    const bulk=document.getElementById("bulkLockBtn");
+    const allLocked=Object.values(list.data).every(d=>d.lock);
+    bulk.textContent=allLocked?"全て解除":"全てロック";
+    bulk.onclick=()=>{
+        backupData();
+        const newState=!allLocked;
+        Object.keys(list.data).forEach(n=>list.data[n].lock=newState);
+        saveData();renderTable();
+    };
 
-thLock.innerHTML=`
+    const favBtn=document.getElementById("favFilterBtn");
+    const mode=list.favFilterMode;
+    favBtn.textContent=mode===0?"全メンバー":mode===1?"お気に入り":"お気に入り以外";
+    favBtn.onclick=()=>{
+        backupData();
+        list.favFilterMode=(list.favFilterMode+1)%3;
+        saveData();renderTable();
+    };
 
-<div class="header-cell">
+    for(let i=0;i<list.typeCount;i++){
+        const th=document.createElement("th");
+        th.className = "col-type";
+        th.textContent=list.typeNames[i];
+        header.appendChild(th);
+    }
 
-ロック
-
-<button id="bulkLockBtn" class="header-btn"></button>
-
-</div>`;
-
-header.appendChild(thLock);
-
-const thMember=document.createElement("th");
-
-thMember.className = "col-member";
-
-thMember.id="memberHeader";
-
-thMember.innerHTML=`
-
-<div class="header-cell">
-
-メンバー
-
-<button id="favFilterBtn" class="header-btn"></button>
-
-</div>`;
-
-header.appendChild(thMember);
-
-const list=lists[currentListIndex];
-
-const bulk=document.getElementById("bulkLockBtn");
-
-const allLocked=Object.values(list.data).every(d=>d.lock);
-
-bulk.textContent=allLocked?"全て解除":"全てロック";
-
-bulk.onclick=()=>{
-
-backupData();
-
-const newState=!allLocked;
-
-Object.keys(list.data).forEach(n=>list.data[n].lock=newState);
-
-saveData();renderTable();
-
-};
-
-const favBtn=document.getElementById("favFilterBtn");
-
-const mode=list.favFilterMode;
-
-favBtn.textContent=mode===0?"全メンバー":mode===1?"お気に入り":"お気に入り以外";
-
-favBtn.onclick=()=>{
-
-backupData();
-
-list.favFilterMode=(list.favFilterMode+1)%3;
-
-saveData();renderTable();
-
-};
-
-for(let i=0;i<list.typeCount;i++){
-
-const th=document.createElement("th");
-
-th.className = "col-type";
-
-th.textContent=list.typeNames[i];
-
-header.appendChild(th);
-
-}
-
-const thDel=document.createElement("th");
-
-thDel.className = "col-delete";
-
-thDel.textContent="削除";
-
-header.appendChild(thDel);
-
+    const thDel=document.createElement("th");
+    thDel.className = "col-delete";
+    thDel.textContent="削除";
+    header.appendChild(thDel);
 }
 
 function createRow(name,gen){
-
-const list=lists[currentListIndex];
-
-if(!list.data[name])list.data[name]={favorite:false,lock:false,items:[]};
-
-const mode=list.favFilterMode;
-
-if(mode===1&&!list.data[name].favorite)return null;
-
-if(mode===2&&list.data[name].favorite)return null;
-
-const tr=document.createElement("tr");
-
-// ロック列
-
-const tdLock=document.createElement("td");
-
-tdLock.className = "col-lock";
-
-const lock=document.createElement("input");
-
-lock.type="checkbox";
-
-lock.checked=list.data[name].lock;
-
-lock.onchange=()=>{
-
-backupData();
-
-list.data[name].lock=lock.checked;
-
-saveData();renderTable();
-
-};
-
-tdLock.appendChild(lock);
-
-tr.appendChild(tdLock);
-
-// メンバー名列
-
-const tdName=document.createElement("td");
-
-tdName.className="col-member name-cell "+genColor[gen];
-
-const fav=document.createElement("span");
-
-fav.textContent="★";
-
-fav.className="favorite"+(list.data[name].favorite?" checked":"");
-
-fav.onclick=()=>{
-
-if(list.data[name].lock)return;
-
-backupData();
-
-list.data[name].favorite=!list.data[name].favorite;
-
-saveData();renderTable();
-
-};
-
-tdName.appendChild(fav);
-
-tdName.appendChild(document.createTextNode(name));
-
-tr.appendChild(tdName);
-
-// 種類列
-
-for (let i = 0; i < list.typeCount; i++) {
-
-if (!list.data[name].items[i]) list.data[name].items[i] = { checked: false, count: "" };
-
-const td = document.createElement("td");
-
-td.className = "col-type type-cell";
-
-// ★ 横並びにするためのコンテナ
-
-const rowBox = document.createElement("div");
-
-rowBox.style.display = "flex";
-
-rowBox.style.flexDirection = "row";
-
-rowBox.style.alignItems = "center";
-
-rowBox.style.justifyContent = "center";
-
-// チェックボックス
-
-const cb = document.createElement("input");
-
-cb.type = "checkbox";
-
-cb.checked = list.data[name].items[i].checked;
-
-cb.style.marginRight = "6px";
-
-// 数字入力欄
-
-const num = document.createElement("input");
-
-num.type = "number";
-
-num.min = 0;
-
-num.value = list.data[name].items[i].count;
-
-num.disabled = !cb.checked;
-
-num.style.marginRight = "6px";
-
-// ★ 右側の縦並びボタンコンテナ
-
-const btnBox = document.createElement("div");
-
-btnBox.style.display = "flex";
-
-btnBox.style.flexDirection = "column";
-
-btnBox.style.marginLeft = "4px";
-
-// ＋ボタン（上）
-
-const btnPlus = document.createElement("button");
-
-btnPlus.textContent = "＋";
-
-btnPlus.style.padding = "2px 4px";
-
-btnPlus.style.marginBottom = "2px";
-
-// −ボタン（下）
-
-const btnMinus = document.createElement("button");
-
-btnMinus.textContent = "−";
-
-btnMinus.style.padding = "2px 4px";
-
-// ＋ボタンの動作
-
-btnPlus.onclick = () => {
-    if (list.data[name].lock) return;
-    if (!cb.checked) return;
-
-    backupData();
-
-    // ★ 空欄は 1 として扱う
-    const current = num.value === "" ? 1 : Number(num.value);
-    const next = current + 1;
-
-    num.value = next;
-    list.data[name].items[i].count = next;
-
-    saveData();
-};
-
-// −ボタンの動作
-
-btnMinus.onclick = () => {
-    if (list.data[name].lock) return;
-    if (!cb.checked) return;
-
-    backupData();
-
-    const current = num.value === "" ? 1 : Number(num.value);
-    const next = Math.max(1, current - 1);
-
-    // ★ 1 のときは空欄に戻す
-    if (next === 1) {
-        num.value = "";
-        list.data[name].items[i].count = "";
-    } else {
-        num.value = next;
-        list.data[name].items[i].count = next;
-    }
-
-    saveData();
-
-};
-
-// チェックボックスの動作
-
-cb.onchange = () => {
-
-if (list.data[name].lock) {
-
-cb.checked = list.data[name].items[i].checked;
-
-return;
-
-}
-
-backupData();
-
-list.data[name].items[i].checked = cb.checked;
-
-num.disabled = !cb.checked;
-
-if (!cb.checked) {
-
-num.value = "";
-
-list.data[name].items[i].count = "";
-
-}
-
-saveData();
-
-};
-
-// 数字入力欄の動作
-
-num.oninput = () => {
-    if (list.data[name].lock) {
+    const list=lists[currentListIndex];
+
+    if(!list.data[name])list.data[name]={favorite:false,lock:false,items:[]};
+
+    const mode=list.favFilterMode;
+    if(mode===1&&!list.data[name].favorite)return null;
+    if(mode===2&&list.data[name].favorite)return null;
+
+    const tr=document.createElement("tr");
+
+    /* ロック列 */
+    const tdLock=document.createElement("td");
+    tdLock.className = "col-lock";
+    const lock=document.createElement("input");
+    lock.type="checkbox";
+    lock.checked=list.data[name].lock;
+    lock.onchange=()=>{
+        backupData();
+        list.data[name].lock=lock.checked;
+        saveData();renderTable();
+    };
+    tdLock.appendChild(lock);
+    tr.appendChild(tdLock);
+
+    /* メンバー名列 */
+    const tdName=document.createElement("td");
+    tdName.className="col-member name-cell "+genColor[gen];
+
+    const fav=document.createElement("span");
+    fav.textContent="★";
+    fav.className="favorite"+(list.data[name].favorite?" checked":"");
+    fav.onclick=()=>{
+        if(list.data[name].lock)return;
+        backupData();
+        list.data[name].favorite=!list.data[name].favorite;
+        saveData();renderTable();
+    };
+
+    tdName.appendChild(fav);
+    tdName.appendChild(document.createTextNode(name));
+    tr.appendChild(tdName);
+
+    /* 種類列 */
+    for (let i = 0; i < list.typeCount; i++) {
+
+        if (!list.data[name].items[i]) list.data[name].items[i] = { checked: false, count: "" };
+
+        const td = document.createElement("td");
+        td.className = "col-type type-cell";
+
+        const rowBox = document.createElement("div");
+        rowBox.style.display = "flex";
+        rowBox.style.flexDirection = "row";
+        rowBox.style.alignItems = "center";
+        rowBox.style.justifyContent = "center";
+
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = list.data[name].items[i].checked;
+        cb.style.marginRight = "6px";
+
+        const num = document.createElement("input");
+        num.type = "number";
+        num.min = 0;
         num.value = list.data[name].items[i].count;
-        return;
+        num.disabled = !cb.checked;
+        num.style.marginRight = "6px";
+
+        const btnBox = document.createElement("div");
+        btnBox.style.display = "flex";
+        btnBox.style.flexDirection = "column";
+        btnBox.style.marginLeft = "4px";
+
+        const btnPlus = document.createElement("button");
+        btnPlus.textContent = "＋";
+        btnPlus.style.padding = "2px 4px";
+        btnPlus.style.marginBottom = "2px";
+
+        const btnMinus = document.createElement("button");
+        btnMinus.textContent = "−";
+        btnMinus.style.padding = "2px 4px";
+
+        btnPlus.onclick = () => {
+            if (list.data[name].lock) return;
+            if (!cb.checked) return;
+
+            backupData();
+
+            const current = num.value === "" ? 1 : Number(num.value);
+            const next = current + 1;
+
+            num.value = next;
+            list.data[name].items[i].count = next;
+
+            saveData();
+            updateTotals();
+        };
+
+        btnMinus.onclick = () => {
+            if (list.data[name].lock) return;
+            if (!cb.checked) return;
+
+            backupData();
+
+            const current = num.value === "" ? 1 : Number(num.value);
+            const next = Math.max(1, current - 1);
+
+            if (next === 1) {
+                num.value = "";
+                list.data[name].items[i].count = "";
+            } else {
+                num.value = next;
+                list.data[name].items[i].count = next;
+            }
+
+            saveData();
+            updateTotals();
+        };
+
+        cb.onchange = () => {
+            if (list.data[name].lock) {
+                cb.checked = list.data[name].items[i].checked;
+                return;
+            }
+
+            backupData();
+            list.data[name].items[i].checked = cb.checked;
+            num.disabled = !cb.checked;
+
+            if (!cb.checked) {
+                num.value = "";
+                list.data[name].items[i].count = "";
+            }
+
+            saveData();
+            updateTotals();
+        };
+
+        num.oninput = () => {
+            if (list.data[name].lock) {
+                num.value = list.data[name].items[i].count;
+                return;
+            }
+
+            backupData();
+            list.data[name].items[i].count = num.value;
+            saveData();
+            updateTotals();
+        };
+
+        btnBox.appendChild(btnPlus);
+        btnBox.appendChild(btnMinus);
+        rowBox.appendChild(cb);
+        rowBox.appendChild(num);
+        rowBox.appendChild(btnBox);
+        td.appendChild(rowBox);
+        tr.appendChild(td);
     }
 
-    backupData();
-    list.data[name].items[i].count = num.value;
-    saveData();
+    /* 削除列 */
+    const tdDel=document.createElement("td");
+    tdDel.className = "col-delete";
+    const del=document.createElement("button");
+    del.textContent="削除";
+    del.onclick=()=>{
+        if(list.data[name].lock)return;
+        backupData();
+        list.members[gen]=list.members[gen].filter(m=>m!==name);
+        delete list.data[name];
+        saveData();renderAll();
+    };
+    tdDel.appendChild(del);
+    tr.appendChild(tdDel);
 
-    // ★ 追加：総数表示を更新
-    const total = calcTotalForList(list);
-    document.getElementById("totalArea").textContent = `総数： ${total}`;
-};
-
-// DOM 追加
-
-btnBox.appendChild(btnPlus);
-
-btnBox.appendChild(btnMinus);
-
-rowBox.appendChild(cb);
-
-rowBox.appendChild(num);
-
-rowBox.appendChild(btnBox);
-
-td.appendChild(rowBox);
-
-tr.appendChild(td);
-
-}
-
-// 削除列
-
-const tdDel=document.createElement("td");
-
-tdDel.className = "col-delete";
-
-const del=document.createElement("button");
-
-del.textContent="削除";
-
-del.onclick=()=>{
-
-if(list.data[name].lock)return;
-
-backupData();
-
-list.members[gen]=list.members[gen].filter(m=>m!==name);
-
-delete list.data[name];
-
-saveData();renderAll();
-
-};
-
-tdDel.appendChild(del);
-
-tr.appendChild(tdDel);
-
-return tr;
-
+    return tr;
 }
 
 function renderTable(){
+    const tableElem = document.querySelector("table");
+    const list=lists[currentListIndex];
 
-const tableElem = document.querySelector("table");
+    if (tableElem) {
+        if (list.typeCount === 5) {
+            tableElem.style.width = "100%";
+            tableElem.style.minWidth = "670px";
+        } else if (list.typeCount === 4) {
+            tableElem.style.width = "calc(100% * 595 / 670)";
+            tableElem.style.minWidth = "595px";
+        } else if (list.typeCount === 3) {
+            tableElem.style.width = "calc(100% * 520 / 670)";
+            tableElem.style.minWidth = "520px";
+        }
+    }
 
-const list=lists[currentListIndex];
+    renderHeader();
 
-if (tableElem) {
+    const body=document.getElementById("tableBody");
+    body.innerHTML="";
 
-if (list.typeCount === 5) {
-
-tableElem.style.width = "100%";
-
-tableElem.style.minWidth = "670px";
-
-} else if (list.typeCount === 4) {
-
-tableElem.style.width = "calc(100% * 595 / 670)";
-
-tableElem.style.minWidth = "595px";
-
-} else if (list.typeCount === 3) {
-
-tableElem.style.width = "calc(100% * 520 / 670)";
-
-tableElem.style.minWidth = "520px";
-
+    Object.keys(list.members).forEach(gen=>{
+        list.members[gen].forEach(name=>{
+            const row=createRow(name,Number(gen));
+            if(row) body.appendChild(row);
+        });
+    });
 }
 
-}
-
-renderHeader();
-
-const body=document.getElementById("tableBody");
-
-body.innerHTML="";
-
-Object.keys(list.members).forEach(gen=>{
-
-list.members[gen].forEach(name=>{
-
-const row=createRow(name,Number(gen));
-
-if(row)body.appendChild(row);
-
-});
-
-});
-
-}
-
-/* ★ タブ全体の総数を計算する関数（追加済み） */
 function calcTotalForList(list) {
     let total = 0;
-    const mode = list.favFilterMode;  // ★ フィルタモード取得
+    const mode = list.favFilterMode;
 
     Object.keys(list.members).forEach(gen => {
         list.members[gen].forEach(name => {
             const d = list.data[name];
             if (!d || !d.items) return;
 
-            // ★ フィルタ判定
-            if (mode === 1 && !d.favorite) return;  // お気に入りのみ
-            if (mode === 2 && d.favorite) return;   // お気に入り以外
+            // フィルタ
+            if (mode === 1 && !d.favorite) return;
+            if (mode === 2 && d.favorite) return;
 
             for (let i = 0; i < list.typeCount; i++) {
                 const item = d.items[i];
@@ -900,25 +582,6 @@ function calcTotalForList(list) {
     return total;
 }
 
-function renderAll(){
-
-renderTabs();
-
-document.getElementById("editTabName").value=lists[currentListIndex].name;
-
-const list=lists[currentListIndex];
-
-document.querySelectorAll("input[name='typeCount']").forEach(r=>{
-
-r.checked=Number(r.value)===list.typeCount;
-
-});
-
-renderTypeNameInputs();
-
-renderTable();
-
-/* ★ 総数表示を更新（追加済み） */
 function calcTotalAllTabs(lists) {
     let total = 0;
 
@@ -944,15 +607,32 @@ function calcTotalAllTabs(lists) {
     return total;
 }
 
-const total = calcTotalForList(list);
-document.getElementById("totalArea").textContent = `総数： ${total} / ${totalAll}`;
+function updateTotals() {
+    const list = lists[currentListIndex];
+    const total = calcTotalForList(list);
+    const totalAll = calcTotalAllTabs(lists);
 
+    document.getElementById("totalArea").textContent =
+        `総数： ${total} / ${totalAll}`;
+}
+
+function renderAll() {
+
+    renderTabs();
+
+    document.getElementById("editTabName").value = lists[currentListIndex].name;
+
+    const list = lists[currentListIndex];
+
+    document.querySelectorAll("input[name='typeCount']").forEach(r=>{
+        r.checked = Number(r.value) === list.typeCount;
+    });
+
+    renderTypeNameInputs();
+    renderTable();
+
+    // ★ 総数表示更新（タブ切り替え時）
+    updateTotals();
 }
 
 renderAll();
-
-</script>
-
-</body>
-
-</html>
