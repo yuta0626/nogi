@@ -919,8 +919,33 @@ renderTypeNameInputs();
 renderTable();
 
 /* ★ 総数表示を更新（追加済み） */
+function calcTotalAllTabs(lists) {
+    let total = 0;
+
+    lists.forEach(list => {
+        Object.keys(list.members).forEach(gen => {
+            list.members[gen].forEach(name => {
+                const d = list.data[name];
+                if (!d || !d.items) return;
+
+                for (let i = 0; i < list.typeCount; i++) {
+                    const item = d.items[i];
+                    if (!item) continue;
+
+                    if (item.checked) {
+                        const v = item.count === "" ? 1 : Number(item.count);
+                        total += v;
+                    }
+                }
+            });
+        });
+    });
+
+    return total;
+}
+
 const total = calcTotalForList(list);
-document.getElementById("totalArea").textContent = `総数： ${total}`;
+document.getElementById("totalArea").textContent = `総数： ${total} / ${totalAll}`;
 
 }
 
